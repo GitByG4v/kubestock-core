@@ -1,4 +1,4 @@
-import ProductAdd from './ProductAdd';
+import ProductAdd from "./ProductAdd";
 
 const ProductEdit = () => {
   return <ProductAdd />;

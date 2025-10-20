@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet } from "react-router-dom";
 
 const AuthLayout = () => {
   return (
@@ -10,13 +10,14 @@ const AuthLayout = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-md animate-slide-up"
-      >
+      <div className="relative z-10 w-full max-w-md animate-slide-up">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-orange p-6 text-white text-center">
             <h1 className="text-3xl font-bold font-poppins">IMS</h1>
-            <p className="text-sm opacity-90 mt-1">Inventory Management System</p>
+            <p className="text-sm opacity-90 mt-1">
+              Inventory Management System
+            </p>
           </div>
 
           {/* Content Area */}

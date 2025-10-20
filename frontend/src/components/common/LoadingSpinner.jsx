@@ -1,10 +1,10 @@
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from "lucide-react";
 
-const LoadingSpinner = ({ size = 'md', text = 'Loading...' }) => {
+const LoadingSpinner = ({ size = "md", text = "Loading..." }) => {
   const sizes = {
-    sm: 'h-8 w-8',
-    md: 'h-12 w-12',
-    lg: 'h-16 w-16',
+    sm: "h-8 w-8",
+    md: "h-12 w-12",
+    lg: "h-16 w-16",
   };
 
   return (

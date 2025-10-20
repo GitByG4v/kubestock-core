@@ -1,4 +1,4 @@
-import AdminDashboard from './AdminDashboard';
+import AdminDashboard from "./AdminDashboard";
 
 const SupplierDashboard = () => {
   return <AdminDashboard />;

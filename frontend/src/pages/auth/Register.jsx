@@ -1,18 +1,18 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import { UserPlus } from 'lucide-react';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import { UserPlus } from "lucide-react";
 
 const Register = () => {
   const { register } = useAuth();
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'warehouse_staff',
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "warehouse_staff",
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -24,27 +24,27 @@ const Register = () => {
     });
     // Clear error for this field
     if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
+      setErrors({ ...errors, [e.target.name]: "" });
     }
   };
 
   const validate = () => {
     const newErrors = {};
     if (!formData.username) {
-      newErrors.username = 'Username is required';
+      newErrors.username = "Username is required";
     }
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "Email is invalid";
     }
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters";
     }
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
     return newErrors;
   };
@@ -63,7 +63,7 @@ const Register = () => {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
     } finally {
       setLoading(false);
     }
@@ -150,8 +150,11 @@ const Register = () => {
 
       <div className="mt-6 text-center">
         <p className="text-sm text-dark-600">
-          Already have an account?{' '}
-          <Link to="/login" className="text-primary hover:text-primary-700 font-medium">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-primary hover:text-primary-700 font-medium"
+          >
             Sign in
           </Link>
         </p>

@@ -1,22 +1,22 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
-import Card from '../../components/common/Card';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import { productService } from '../../services/productService';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Save } from "lucide-react";
+import Card from "../../components/common/Card";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import { productService } from "../../services/productService";
+import toast from "react-hot-toast";
 
 const ProductAdd = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    sku: '',
-    price: '',
-    cost: '',
-    category_id: '',
+    name: "",
+    description: "",
+    sku: "",
+    price: "",
+    cost: "",
+    category_id: "",
     is_active: true,
   });
 
@@ -24,7 +24,7 @@ const ProductAdd = () => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
@@ -34,11 +34,11 @@ const ProductAdd = () => {
 
     try {
       await productService.createProduct(formData);
-      toast.success('Product created successfully');
-      navigate('/products');
+      toast.success("Product created successfully");
+      navigate("/products");
     } catch (error) {
-      toast.error('Failed to create product');
-      console.error('Error creating product:', error);
+      toast.error("Failed to create product");
+      console.error("Error creating product:", error);
     } finally {
       setLoading(false);
     }
@@ -48,12 +48,18 @@ const ProductAdd = () => {
     <div>
       {/* Header */}
       <div className="flex items-center mb-8">
-        <Button variant="ghost" onClick={() => navigate('/products')} className="mr-4">
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/products")}
+          className="mr-4"
+        >
           <ArrowLeft size={20} />
         </Button>
         <div>
           <h1 className="text-3xl font-bold text-dark-900">Add New Product</h1>
-          <p className="text-dark-600 mt-2">Create a new product in your catalog</p>
+          <p className="text-dark-600 mt-2">
+            Create a new product in your catalog
+          </p>
         </div>
       </div>
 
@@ -119,7 +125,9 @@ const ProductAdd = () => {
                   onChange={handleChange}
                   className="rounded border-dark-300 text-primary focus:ring-primary"
                 />
-                <span className="ml-2 text-sm text-dark-700">Active Product</span>
+                <span className="ml-2 text-sm text-dark-700">
+                  Active Product
+                </span>
               </label>
             </div>
           </div>
@@ -128,7 +136,7 @@ const ProductAdd = () => {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => navigate('/products')}
+              onClick={() => navigate("/products")}
             >
               Cancel
             </Button>

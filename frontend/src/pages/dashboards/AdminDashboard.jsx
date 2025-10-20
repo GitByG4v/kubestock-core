@@ -1,17 +1,27 @@
-import { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Package, 
-  TrendingUp, 
+import { useState, useEffect } from "react";
+import {
+  Users,
+  Package,
+  TrendingUp,
   AlertCircle,
   Activity,
   Box,
-} from 'lucide-react';
-import Card from '../../components/common/Card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { productService } from '../../services/productService';
-import { inventoryService } from '../../services/inventoryService';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
+} from "lucide-react";
+import Card from "../../components/common/Card";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from "recharts";
+import { productService } from "../../services/productService";
+import { inventoryService } from "../../services/inventoryService";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -35,24 +45,27 @@ const AdminDashboard = () => {
 
       setStats({
         totalProducts: products.data?.length || 0,
-        totalInventory: inventory.data?.reduce((sum, item) => sum + item.quantity, 0) || 0,
-        lowStockItems: inventory.data?.filter(item => item.quantity < item.min_quantity).length || 0,
+        totalInventory:
+          inventory.data?.reduce((sum, item) => sum + item.quantity, 0) || 0,
+        lowStockItems:
+          inventory.data?.filter((item) => item.quantity < item.min_quantity)
+            .length || 0,
         recentMovements: 0,
       });
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const chartData = [
-    { name: 'Jan', value: 4000 },
-    { name: 'Feb', value: 3000 },
-    { name: 'Mar', value: 2000 },
-    { name: 'Apr', value: 2780 },
-    { name: 'May', value: 1890 },
-    { name: 'Jun', value: 2390 },
+    { name: "Jan", value: 4000 },
+    { name: "Feb", value: 3000 },
+    { name: "Mar", value: 2000 },
+    { name: "Apr", value: 2780 },
+    { name: "May", value: 1890 },
+    { name: "Jun", value: 2390 },
   ];
 
   if (loading) {
@@ -64,7 +77,9 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-dark-900">Admin Dashboard</h1>
-        <p className="text-dark-600 mt-2">Welcome back! Here's what's happening in your inventory.</p>
+        <p className="text-dark-600 mt-2">
+          Welcome back! Here's what's happening in your inventory.
+        </p>
       </div>
 
       {/* Stats Grid */}
@@ -83,7 +98,9 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-90">Total Inventory</p>
-              <h3 className="text-3xl font-bold mt-2">{stats.totalInventory}</h3>
+              <h3 className="text-3xl font-bold mt-2">
+                {stats.totalInventory}
+              </h3>
             </div>
             <Box size={40} className="opacity-80" />
           </div>
@@ -123,7 +140,12 @@ const AdminDashboard = () => {
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="value" stroke="#F97316" strokeWidth={2} />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#F97316"
+                strokeWidth={2}
+              />
             </LineChart>
           </ResponsiveContainer>
         </Card>
@@ -147,15 +169,22 @@ const AdminDashboard = () => {
 
       {/* Recent Activity */}
       <Card>
-        <h3 className="text-lg font-semibold text-dark-900 mb-4">Recent Activity</h3>
+        <h3 className="text-lg font-semibold text-dark-900 mb-4">
+          Recent Activity
+        </h3>
         <div className="space-y-3">
           {[1, 2, 3].map((item) => (
-            <div key={item} className="flex items-center p-3 bg-dark-50 rounded-lg">
+            <div
+              key={item}
+              className="flex items-center p-3 bg-dark-50 rounded-lg"
+            >
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
                 <Activity size={20} />
               </div>
               <div className="ml-4 flex-1">
-                <p className="text-sm font-medium text-dark-900">Stock adjusted for Product #{item}</p>
+                <p className="text-sm font-medium text-dark-900">
+                  Stock adjusted for Product #{item}
+                </p>
                 <p className="text-xs text-dark-500">2 hours ago</p>
               </div>
             </div>

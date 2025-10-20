@@ -1,7 +1,7 @@
-import { Menu, Bell, LogOut, User } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Menu, Bell, LogOut, User } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Navbar = ({ toggleSidebar }) => {
   const { user, logout } = useAuth();
@@ -41,9 +41,11 @@ const Navbar = ({ toggleSidebar }) => {
                 {user?.username?.charAt(0).toUpperCase()}
               </div>
               <div className="hidden md:block text-left">
-                <p className="text-sm font-medium text-dark-900">{user?.username}</p>
+                <p className="text-sm font-medium text-dark-900">
+                  {user?.username}
+                </p>
                 <p className="text-xs text-dark-500 capitalize">
-                  {user?.role?.replace('_', ' ')}
+                  {user?.role?.replace("_", " ")}
                 </p>
               </div>
             </button>

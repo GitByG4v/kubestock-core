@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Search, Filter } from 'lucide-react';
-import Card from '../../components/common/Card';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import Badge from '../../components/common/Badge';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { productService } from '../../services/productService';
-import { formatCurrency } from '../../utils/helpers';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Plus, Search, Filter } from "lucide-react";
+import Card from "../../components/common/Card";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import Badge from "../../components/common/Badge";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { productService } from "../../services/productService";
+import { formatCurrency } from "../../utils/helpers";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchProducts();
@@ -23,15 +23,16 @@ const ProductList = () => {
       const response = await productService.getAllProducts();
       setProducts(response.data || []);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -85,13 +86,19 @@ const ProductList = () => {
                 <span className="text-4xl text-dark-400">📦</span>
               </div>
             </div>
-            <h3 className="text-lg font-semibold text-dark-900 mb-2">{product.name}</h3>
+            <h3 className="text-lg font-semibold text-dark-900 mb-2">
+              {product.name}
+            </h3>
             <p className="text-sm text-dark-600 mb-2">SKU: {product.sku}</p>
-            <p className="text-sm text-dark-500 mb-4 line-clamp-2">{product.description}</p>
+            <p className="text-sm text-dark-500 mb-4 line-clamp-2">
+              {product.description}
+            </p>
             <div className="flex justify-between items-center mb-4">
-              <span className="text-lg font-bold text-primary">{formatCurrency(product.price)}</span>
-              <Badge variant={product.is_active ? 'success' : 'danger'}>
-                {product.is_active ? 'Active' : 'Inactive'}
+              <span className="text-lg font-bold text-primary">
+                {formatCurrency(product.price)}
+              </span>
+              <Badge variant={product.is_active ? "success" : "danger"}>
+                {product.is_active ? "Active" : "Inactive"}
               </Badge>
             </div>
             <Link to={`/products/edit/${product.id}`}>

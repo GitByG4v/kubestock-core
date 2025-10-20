@@ -1,4 +1,10 @@
-const Table = ({ headers, data, renderRow, loading, emptyMessage = 'No data available' }) => {
+const Table = ({
+  headers,
+  data,
+  renderRow,
+  loading,
+  emptyMessage = "No data available",
+}) => {
   if (loading) {
     return (
       <div className="text-center py-8">

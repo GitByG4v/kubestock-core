@@ -1,12 +1,12 @@
-import api from '../utils/axios';
-import { API_ENDPOINTS } from '../utils/constants';
+import api from "../utils/axios";
+import { API_ENDPOINTS } from "../utils/constants";
 
 export const authService = {
   login: async (credentials) => {
     const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, credentials);
     if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
     }
     return response.data;
   },
@@ -17,8 +17,8 @@ export const authService = {
   },
 
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   },
 
   getCurrentUser: async () => {
@@ -27,20 +27,23 @@ export const authService = {
   },
 
   changePassword: async (passwordData) => {
-    const response = await api.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, passwordData);
+    const response = await api.post(
+      API_ENDPOINTS.AUTH.CHANGE_PASSWORD,
+      passwordData
+    );
     return response.data;
   },
 
   getStoredUser: () => {
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   },
 
   getToken: () => {
-    return localStorage.getItem('token');
+    return localStorage.getItem("token");
   },
 
   isAuthenticated: () => {
-    return !!localStorage.getItem('token');
+    return !!localStorage.getItem("token");
   },
 };
