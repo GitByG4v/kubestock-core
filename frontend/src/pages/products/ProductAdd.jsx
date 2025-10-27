@@ -14,9 +14,10 @@ const ProductAdd = () => {
     name: "",
     description: "",
     sku: "",
-    price: "",
-    cost: "",
+    unit_price: "",
     category_id: "",
+    size: "",
+    color: "",
     is_active: true,
   });
 
@@ -86,24 +87,32 @@ const ProductAdd = () => {
             />
 
             <Input
-              label="Price"
-              name="price"
+              label="Unit Price"
+              name="unit_price"
               type="number"
               step="0.01"
-              value={formData.price}
+              value={formData.unit_price}
               onChange={handleChange}
               required
               placeholder="0.00"
             />
 
             <Input
-              label="Cost"
-              name="cost"
-              type="number"
-              step="0.01"
-              value={formData.cost}
+              label="Size"
+              name="size"
+              type="text"
+              value={formData.size}
               onChange={handleChange}
-              placeholder="0.00"
+              placeholder="e.g., Small, Medium, Large"
+            />
+
+            <Input
+              label="Color"
+              name="color"
+              type="text"
+              value={formData.color}
+              onChange={handleChange}
+              placeholder="e.g., Red, Blue, Green"
             />
 
             <div className="md:col-span-2">
