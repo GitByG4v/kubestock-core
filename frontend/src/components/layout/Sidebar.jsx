@@ -112,13 +112,23 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                   cn(
                     "flex items-center px-4 py-3 rounded-lg transition-all duration-200",
                     isActive
-                      ? "bg-primary text-white"
-                      : "text-dark-300 hover:bg-dark-800 hover:text-white"
+                      ? "bg-primary !text-white font-semibold shadow-lg"
+                      : "text-primary hover:bg-dark-800 hover:text-primary"
                   )
                 }
               >
-                <item.icon size={20} className="flex-shrink-0" />
-                {isOpen && <span className="ml-3">{item.name}</span>}
+                {({ isActive }) => (
+                  <>
+                    <item.icon
+                      size={20}
+                      className={cn(
+                        "flex-shrink-0",
+                        isActive ? "!text-white" : ""
+                      )}
+                    />
+                    {isOpen && <span className="ml-3">{item.name}</span>}
+                  </>
+                )}
               </NavLink>
             </li>
           ))}
