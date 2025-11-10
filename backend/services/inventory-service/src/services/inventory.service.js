@@ -5,8 +5,10 @@ const logger = require("../config/logger");
 const axios = require("axios");
 
 // Service URLs from environment or defaults
-const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL || "http://product-catalog-service:3002";
-const SUPPLIER_SERVICE_URL = process.env.SUPPLIER_SERVICE_URL || "http://supplier-service:3004";
+const PRODUCT_SERVICE_URL =
+  process.env.PRODUCT_SERVICE_URL || "http://product-catalog-service:3002";
+const SUPPLIER_SERVICE_URL =
+  process.env.SUPPLIER_SERVICE_URL || "http://supplier-service:3004";
 
 class InventoryService {
   /**
@@ -15,12 +17,12 @@ class InventoryService {
   static async checkStockAvailability(productId, requiredQuantity) {
     try {
       const inventory = await Inventory.findByProductId(productId);
-      
+
       if (!inventory) {
         return {
           available: false,
           reason: "Product not found in inventory",
-          currentStock: 0
+          currentStock: 0,
         };
       }
 
@@ -34,14 +36,14 @@ class InventoryService {
           reason: "Insufficient stock",
           currentStock: availableStock,
           requested: requiredQuantity,
-          shortage: requiredQuantity - availableStock
+          shortage: requiredQuantity - availableStock,
         };
       }
 
       return {
         available: true,
         currentStock: availableStock,
-        requested: requiredQuantity
+        requested: requiredQuantity,
       };
     } catch (error) {
       logger.error("Error checking stock availability:", error);
@@ -54,7 +56,7 @@ class InventoryService {
    */
   static async reserveStock(productId, quantity, orderId) {
     const client = await db.getClient();
-    
+
     try {
       await client.query("BEGIN");
 
@@ -64,9 +66,12 @@ class InventoryService {
         throw new Error("Product not found in inventory");
       }
 
-      const availableStock = inventory.quantity - (inventory.reserved_quantity || 0);
+      const availableStock =
+        inventory.quantity - (inventory.reserved_quantity || 0);
       if (availableStock < quantity) {
-        throw new Error(`Insufficient stock. Available: ${availableStock}, Required: ${quantity}`);
+        throw new Error(
+          `Insufficient stock. Available: ${availableStock}, Required: ${quantity}`
+        );
       }
 
       // Reserve the stock
@@ -77,21 +82,26 @@ class InventoryService {
         WHERE product_id = $2
         RETURNING *
       `;
-      
+
       const result = await client.query(updateQuery, [quantity, productId]);
 
       // Log the reservation
-      await StockMovement.create({
-        product_id: productId,
-        quantity: -quantity,
-        movement_type: "reserved",
-        reference_id: orderId.toString(),
-        notes: `Stock reserved for order #${orderId}`
-      }, client);
+      await StockMovement.create(
+        {
+          product_id: productId,
+          quantity: -quantity,
+          movement_type: "reserved",
+          reference_id: orderId.toString(),
+          notes: `Stock reserved for order #${orderId}`,
+        },
+        client
+      );
 
       await client.query("COMMIT");
-      
-      logger.info(`Reserved ${quantity} units of product ${productId} for order ${orderId}`);
+
+      logger.info(
+        `Reserved ${quantity} units of product ${productId} for order ${orderId}`
+      );
       return result.rows[0];
     } catch (error) {
       await client.query("ROLLBACK");
@@ -107,7 +117,7 @@ class InventoryService {
    */
   static async releaseReservedStock(productId, quantity, orderId) {
     const client = await db.getClient();
-    
+
     try {
       await client.query("BEGIN");
 
@@ -118,21 +128,26 @@ class InventoryService {
         WHERE product_id = $2
         RETURNING *
       `;
-      
+
       const result = await client.query(updateQuery, [quantity, productId]);
 
       // Log the release
-      await StockMovement.create({
-        product_id: productId,
-        quantity: quantity,
-        movement_type: "released",
-        reference_id: orderId.toString(),
-        notes: `Stock released from cancelled order #${orderId}`
-      }, client);
+      await StockMovement.create(
+        {
+          product_id: productId,
+          quantity: quantity,
+          movement_type: "released",
+          reference_id: orderId.toString(),
+          notes: `Stock released from cancelled order #${orderId}`,
+        },
+        client
+      );
 
       await client.query("COMMIT");
-      
-      logger.info(`Released ${quantity} units of product ${productId} from order ${orderId}`);
+
+      logger.info(
+        `Released ${quantity} units of product ${productId} from order ${orderId}`
+      );
       return result.rows[0];
     } catch (error) {
       await client.query("ROLLBACK");
@@ -148,7 +163,7 @@ class InventoryService {
    */
   static async confirmStockDeduction(productId, quantity, orderId) {
     const client = await db.getClient();
-    
+
     try {
       await client.query("BEGIN");
 
@@ -161,25 +176,30 @@ class InventoryService {
         WHERE product_id = $2
         RETURNING *
       `;
-      
+
       const result = await client.query(updateQuery, [quantity, productId]);
       const updatedInventory = result.rows[0];
 
       // Log the deduction
-      await StockMovement.create({
-        product_id: productId,
-        quantity: -quantity,
-        movement_type: "sale",
-        reference_id: orderId.toString(),
-        notes: `Stock sold - Order #${orderId} completed`
-      }, client);
+      await StockMovement.create(
+        {
+          product_id: productId,
+          quantity: -quantity,
+          movement_type: "sale",
+          reference_id: orderId.toString(),
+          notes: `Stock sold - Order #${orderId} completed`,
+        },
+        client
+      );
 
       await client.query("COMMIT");
 
       // Check if stock is low and needs reordering
       await this.checkAndAlertLowStock(updatedInventory);
-      
-      logger.info(`Deducted ${quantity} units of product ${productId} for completed order ${orderId}`);
+
+      logger.info(
+        `Deducted ${quantity} units of product ${productId} for completed order ${orderId}`
+      );
       return updatedInventory;
     } catch (error) {
       await client.query("ROLLBACK");
@@ -195,15 +215,20 @@ class InventoryService {
    */
   static async checkAndAlertLowStock(inventory) {
     try {
-      const availableStock = inventory.quantity - (inventory.reserved_quantity || 0);
-      
+      const availableStock =
+        inventory.quantity - (inventory.reserved_quantity || 0);
+
       if (availableStock <= inventory.reorder_level) {
-        logger.warn(`LOW STOCK ALERT: Product ${inventory.product_id} (SKU: ${inventory.sku}) - Available: ${availableStock}, Reorder Level: ${inventory.reorder_level}`);
-        
+        logger.warn(
+          `LOW STOCK ALERT: Product ${inventory.product_id} (SKU: ${inventory.sku}) - Available: ${availableStock}, Reorder Level: ${inventory.reorder_level}`
+        );
+
         // Get product details
         let productName = `Product ${inventory.product_id}`;
         try {
-          const productResponse = await axios.get(`${PRODUCT_SERVICE_URL}/api/products/${inventory.product_id}`);
+          const productResponse = await axios.get(
+            `${PRODUCT_SERVICE_URL}/api/products/${inventory.product_id}`
+          );
           productName = productResponse.data.name || productName;
         } catch (error) {
           logger.warn("Could not fetch product details for alert");
@@ -220,12 +245,12 @@ class InventoryService {
             status = 'active'
           RETURNING *
         `;
-        
+
         await db.query(alertQuery, [
           inventory.product_id,
           inventory.sku,
           availableStock,
-          inventory.reorder_level
+          inventory.reorder_level,
         ]);
 
         // TODO: Trigger notification service
@@ -246,22 +271,24 @@ class InventoryService {
   static async suggestAutoReorder(inventory, productName) {
     try {
       const reorderQuantity = inventory.max_stock_level - inventory.quantity;
-      
+
       if (reorderQuantity > 0) {
-        logger.info(`REORDER SUGGESTION: ${productName} (SKU: ${inventory.sku}) - Suggested quantity: ${reorderQuantity}`);
-        
+        logger.info(
+          `REORDER SUGGESTION: ${productName} (SKU: ${inventory.sku}) - Suggested quantity: ${reorderQuantity}`
+        );
+
         // Create reorder suggestion record
         const suggestionQuery = `
           INSERT INTO reorder_suggestions (product_id, sku, current_quantity, suggested_quantity, status)
           VALUES ($1, $2, $3, $4, 'pending')
           RETURNING *
         `;
-        
+
         await db.query(suggestionQuery, [
           inventory.product_id,
           inventory.sku,
           inventory.quantity,
-          reorderQuantity
+          reorderQuantity,
         ]);
 
         // TODO: Notify purchasing team
@@ -279,22 +306,25 @@ class InventoryService {
     try {
       const results = await Promise.all(
         items.map(async (item) => {
-          const check = await this.checkStockAvailability(item.product_id, item.quantity);
+          const check = await this.checkStockAvailability(
+            item.product_id,
+            item.quantity
+          );
           return {
             product_id: item.product_id,
             sku: item.sku,
-            ...check
+            ...check,
           };
         })
       );
 
-      const allAvailable = results.every(r => r.available);
-      const unavailableItems = results.filter(r => !r.available);
+      const allAvailable = results.every((r) => r.available);
+      const unavailableItems = results.filter((r) => !r.available);
 
       return {
         allAvailable,
         items: results,
-        unavailableItems
+        unavailableItems,
       };
     } catch (error) {
       logger.error("Error in bulk stock check:", error);
@@ -307,21 +337,29 @@ class InventoryService {
    */
   static async receiveStock(productId, quantity, supplierOrderId, notes = "") {
     const client = await db.getClient();
-    
+
     try {
       await client.query("BEGIN");
 
       // Update inventory
-      const inventory = await Inventory.updateQuantity(productId, quantity, client);
+      const inventory = await Inventory.updateQuantity(
+        productId,
+        quantity,
+        client
+      );
 
       // Log the receipt
-      await StockMovement.create({
-        product_id: productId,
-        quantity: quantity,
-        movement_type: "purchase",
-        reference_id: supplierOrderId,
-        notes: notes || `Stock received from supplier order #${supplierOrderId}`
-      }, client);
+      await StockMovement.create(
+        {
+          product_id: productId,
+          quantity: quantity,
+          movement_type: "purchase",
+          reference_id: supplierOrderId,
+          notes:
+            notes || `Stock received from supplier order #${supplierOrderId}`,
+        },
+        client
+      );
 
       await client.query("COMMIT");
 
@@ -334,7 +372,9 @@ class InventoryService {
         );
       }
 
-      logger.info(`Received ${quantity} units of product ${productId} from supplier order ${supplierOrderId}`);
+      logger.info(
+        `Received ${quantity} units of product ${productId} from supplier order ${supplierOrderId}`
+      );
       return inventory;
     } catch (error) {
       await client.query("ROLLBACK");
@@ -360,7 +400,7 @@ class InventoryService {
           AVG(quantity) as avg_stock_per_product
         FROM inventory
       `;
-      
+
       const result = await db.query(analyticsQuery);
       return result.rows[0];
     } catch (error) {
@@ -380,7 +420,7 @@ class InventoryService {
         ORDER BY created_at DESC 
         LIMIT $2
       `;
-      
+
       const result = await db.query(query, [productId, limit]);
       return result.rows;
     } catch (error) {

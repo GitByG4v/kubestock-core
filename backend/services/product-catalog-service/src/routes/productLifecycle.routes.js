@@ -36,7 +36,10 @@ router.post("/:id/transition", ProductLifecycleController.transitionState);
  * @desc    Get all products pending approval
  * @access  Admin
  */
-router.get("/pending-approvals", ProductLifecycleController.getPendingApprovals);
+router.get(
+  "/pending-approvals",
+  ProductLifecycleController.getPendingApprovals
+);
 
 /**
  * @route   POST /api/products/:id/submit-for-approval
@@ -44,7 +47,10 @@ router.get("/pending-approvals", ProductLifecycleController.getPendingApprovals)
  * @access  Public
  * @body    { userId, notes }
  */
-router.post("/:id/submit-for-approval", ProductLifecycleController.submitForApproval);
+router.post(
+  "/:id/submit-for-approval",
+  ProductLifecycleController.submitForApproval
+);
 
 /**
  * @route   POST /api/products/:id/approve
@@ -109,7 +115,10 @@ router.get("/by-state/:state", ProductLifecycleController.getProductsByState);
  * @access  Public
  * @query   limit (default: 50)
  */
-router.get("/:id/lifecycle-history", ProductLifecycleController.getLifecycleHistory);
+router.get(
+  "/:id/lifecycle-history",
+  ProductLifecycleController.getLifecycleHistory
+);
 
 /**
  * @route   GET /api/products/lifecycle-stats

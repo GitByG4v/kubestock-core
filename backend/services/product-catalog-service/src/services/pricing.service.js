@@ -17,7 +17,7 @@ class PricingService {
     try {
       // Get base product price
       const product = await this.getProductWithPricing(productId);
-      
+
       if (!product) {
         throw new Error("Product not found");
       }
@@ -29,7 +29,8 @@ class PricingService {
       // 1. Check bulk discounts (quantity-based)
       const bulkDiscount = await this.getBulkDiscount(productId, quantity);
       if (bulkDiscount) {
-        const discountAmount = (basePrice * bulkDiscount.discount_percentage) / 100;
+        const discountAmount =
+          (basePrice * bulkDiscount.discount_percentage) / 100;
         finalPrice -= discountAmount;
         appliedDiscounts.push({
           type: "bulk",
@@ -53,9 +54,12 @@ class PricingService {
       }
 
       // 3. Check category-wide discounts
-      const categoryDiscount = await this.getCategoryDiscount(product.category_id);
+      const categoryDiscount = await this.getCategoryDiscount(
+        product.category_id
+      );
       if (categoryDiscount) {
-        const catAmount = (finalPrice * categoryDiscount.discount_percentage) / 100;
+        const catAmount =
+          (finalPrice * categoryDiscount.discount_percentage) / 100;
         finalPrice -= catAmount;
         appliedDiscounts.push({
           type: "category",
@@ -67,9 +71,13 @@ class PricingService {
 
       // 4. Check customer tier pricing (VIP, Gold, Silver)
       if (customerId) {
-        const tierDiscount = await this.getCustomerTierDiscount(customerId, productId);
+        const tierDiscount = await this.getCustomerTierDiscount(
+          customerId,
+          productId
+        );
         if (tierDiscount) {
-          const tierAmount = (finalPrice * tierDiscount.discount_percentage) / 100;
+          const tierAmount =
+            (finalPrice * tierDiscount.discount_percentage) / 100;
           finalPrice -= tierAmount;
           appliedDiscounts.push({
             type: "customer_tier",
@@ -82,10 +90,15 @@ class PricingService {
 
       // Calculate totals
       const subtotal = basePrice * quantity;
-      const totalDiscount = appliedDiscounts.reduce((sum, d) => sum + d.amount, 0);
+      const totalDiscount = appliedDiscounts.reduce(
+        (sum, d) => sum + d.amount,
+        0
+      );
       const finalTotal = (finalPrice * quantity).toFixed(2);
 
-      logger.info(`Price calculated for product ${productId}: ${basePrice} → ${finalPrice}`);
+      logger.info(
+        `Price calculated for product ${productId}: ${basePrice} → ${finalPrice}`
+      );
 
       return {
         productId,
@@ -188,17 +201,17 @@ class PricingService {
       Gold: 5,
       Silver: 2,
     };
-    
+
     // Simulate tier check (in production, call User Service API)
     const customerTier = await this.getCustomerTier(customerId);
-    
+
     if (customerTier && tiers[customerTier]) {
       return {
         tier_name: customerTier,
         discount_percentage: tiers[customerTier],
       };
     }
-    
+
     return null;
   }
 
@@ -209,7 +222,7 @@ class PricingService {
   async getCustomerTier(customerId) {
     // Mock: Return tier based on customer ID for demo
     // In production: const response = await axios.get(`http://user-service:3001/api/users/${customerId}/tier`)
-    
+
     const mockTiers = ["VIP", "Gold", "Silver", null];
     return mockTiers[customerId % 4];
   }
@@ -346,7 +359,7 @@ class PricingService {
           item.quantity,
           item.customerId
         );
-        
+
         totalPrice += pricing.subtotal;
         totalDiscount += pricing.totalDiscount;
         itemDetails.push(pricing);
@@ -354,8 +367,9 @@ class PricingService {
 
       // Apply bundle discount (e.g., 5% off when buying multiple items)
       const bundleDiscountPercentage = 5;
-      const bundleDiscount = ((totalPrice - totalDiscount) * bundleDiscountPercentage) / 100;
-      
+      const bundleDiscount =
+        ((totalPrice - totalDiscount) * bundleDiscountPercentage) / 100;
+
       const finalTotal = totalPrice - totalDiscount - bundleDiscount;
 
       return {

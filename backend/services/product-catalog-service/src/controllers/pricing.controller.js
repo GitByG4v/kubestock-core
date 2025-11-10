@@ -81,7 +81,11 @@ class PricingController {
       const ruleData = req.body;
 
       // Validate required fields
-      if (!ruleData.rule_name || !ruleData.rule_type || !ruleData.discount_percentage) {
+      if (
+        !ruleData.rule_name ||
+        !ruleData.rule_type ||
+        !ruleData.discount_percentage
+      ) {
         return res.status(400).json({
           success: false,
           message: "Rule name, type, and discount percentage are required",
@@ -145,7 +149,10 @@ class PricingController {
       const { id } = req.params;
       const updateData = req.body;
 
-      const updatedRule = await PricingService.updatePricingRule(id, updateData);
+      const updatedRule = await PricingService.updatePricingRule(
+        id,
+        updateData
+      );
 
       if (!updatedRule) {
         return res.status(404).json({
@@ -197,7 +204,8 @@ class PricingController {
               basePrice: pricing.basePrice,
             },
           ],
-          message: "Historical tracking will be implemented with time-series data",
+          message:
+            "Historical tracking will be implemented with time-series data",
         },
       });
     } catch (error) {

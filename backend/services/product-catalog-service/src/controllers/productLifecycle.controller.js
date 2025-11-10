@@ -99,7 +99,7 @@ class ProductLifecycleController {
       });
     } catch (error) {
       logger.error("Transition state error:", error);
-      
+
       if (error.message.includes("Invalid state transition")) {
         return res.status(400).json({
           success: false,
@@ -183,7 +183,8 @@ class ProductLifecycleController {
    */
   async getPendingApprovals(req, res) {
     try {
-      const pendingProducts = await ProductLifecycleService.getPendingApprovals();
+      const pendingProducts =
+        await ProductLifecycleService.getPendingApprovals();
 
       res.json({
         success: true,
@@ -225,7 +226,9 @@ class ProductLifecycleController {
       const successCount = results.filter((r) => r.success).length;
       const failureCount = results.filter((r) => !r.success).length;
 
-      logger.info(`Bulk approval: ${successCount} succeeded, ${failureCount} failed`);
+      logger.info(
+        `Bulk approval: ${successCount} succeeded, ${failureCount} failed`
+      );
 
       res.json({
         success: true,
@@ -427,7 +430,9 @@ class ProductLifecycleController {
       const stats = {};
 
       for (const state of states) {
-        const products = await ProductLifecycleService.getProductsByState(state);
+        const products = await ProductLifecycleService.getProductsByState(
+          state
+        );
         stats[state] = products.length;
       }
 

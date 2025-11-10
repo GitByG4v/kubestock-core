@@ -5,9 +5,12 @@ const logger = require("../config/logger");
 const axios = require("axios");
 
 // Service URLs
-const INVENTORY_SERVICE_URL = process.env.INVENTORY_SERVICE_URL || "http://inventory-service:3003";
-const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL || "http://product-catalog-service:3002";
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://user-service:3001";
+const INVENTORY_SERVICE_URL =
+  process.env.INVENTORY_SERVICE_URL || "http://inventory-service:3003";
+const PRODUCT_SERVICE_URL =
+  process.env.PRODUCT_SERVICE_URL || "http://product-catalog-service:3002";
+const USER_SERVICE_URL =
+  process.env.USER_SERVICE_URL || "http://user-service:3001";
 
 class OrderService {
   /**
@@ -15,58 +18,67 @@ class OrderService {
    */
   static async createOrder(orderData) {
     const client = await db.getClient();
-    
+
     try {
       await client.query("BEGIN");
-      
+
       // Step 1: Validate customer
       await this.validateCustomer(orderData.customer_id);
-      
+
       // Step 2: Validate and enrich product data
       const enrichedItems = await this.validateAndEnrichItems(orderData.items);
-      
+
       // Step 3: Check stock availability for all items
       const stockCheck = await this.checkStockAvailability(enrichedItems);
-      
+
       if (!stockCheck.allAvailable) {
-        throw new Error(`Stock not available for some items: ${JSON.stringify(stockCheck.unavailableItems)}`);
+        throw new Error(
+          `Stock not available for some items: ${JSON.stringify(
+            stockCheck.unavailableItems
+          )}`
+        );
       }
-      
+
       // Step 4: Calculate accurate totals
       const totals = this.calculateOrderTotals(enrichedItems);
-      
+
       // Step 5: Create the order
-      const order = await Order.create({
-        ...orderData,
-        total_amount: totals.total,
-        status: "pending"
-      }, client);
-      
+      const order = await Order.create(
+        {
+          ...orderData,
+          total_amount: totals.total,
+          status: "pending",
+        },
+        client
+      );
+
       // Step 6: Create order items
       const items = await OrderItem.createBatch(
-        enrichedItems.map(item => ({
+        enrichedItems.map((item) => ({
           order_id: order.id,
           product_id: item.product_id,
           sku: item.sku,
           product_name: item.product_name,
           quantity: item.quantity,
-          unit_price: item.unit_price
+          unit_price: item.unit_price,
         })),
         client
       );
-      
+
       // Step 7: Reserve stock in inventory service
       await this.reserveStockForOrder(order.id, enrichedItems);
-      
+
       await client.query("COMMIT");
-      
-      logger.info(`Order ${order.id} created successfully with ${items.length} items`);
-      
+
+      logger.info(
+        `Order ${order.id} created successfully with ${items.length} items`
+      );
+
       // Step 8: Trigger post-order actions (async, don't wait)
-      this.handlePostOrderCreation(order, items).catch(err => 
+      this.handlePostOrderCreation(order, items).catch((err) =>
         logger.error("Error in post-order creation:", err)
       );
-      
+
       return { order, items, totals };
     } catch (error) {
       await client.query("ROLLBACK");
@@ -82,17 +94,19 @@ class OrderService {
    */
   static async validateCustomer(customerId) {
     try {
-      const response = await axios.get(`${USER_SERVICE_URL}/api/users/${customerId}`);
+      const response = await axios.get(
+        `${USER_SERVICE_URL}/api/users/${customerId}`
+      );
       const user = response.data;
-      
+
       if (!user) {
         throw new Error(`Customer ${customerId} not found`);
       }
-      
+
       if (!user.is_active) {
         throw new Error(`Customer ${customerId} is not active`);
       }
-      
+
       return user;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -111,17 +125,21 @@ class OrderService {
       const enrichedItems = await Promise.all(
         items.map(async (item) => {
           // Get product details
-          const response = await axios.get(`${PRODUCT_SERVICE_URL}/api/products/${item.product_id}`);
+          const response = await axios.get(
+            `${PRODUCT_SERVICE_URL}/api/products/${item.product_id}`
+          );
           const product = response.data;
-          
+
           if (!product) {
             throw new Error(`Product ${item.product_id} not found`);
           }
-          
+
           if (!product.is_active) {
-            throw new Error(`Product ${item.product_id} is not available for sale`);
+            throw new Error(
+              `Product ${item.product_id} is not available for sale`
+            );
           }
-          
+
           // Use product data if not provided in order
           return {
             product_id: item.product_id,
@@ -129,11 +147,11 @@ class OrderService {
             product_name: item.product_name || product.name,
             quantity: item.quantity,
             unit_price: item.unit_price || product.unit_price,
-            product: product // Include full product data for reference
+            product: product, // Include full product data for reference
           };
         })
       );
-      
+
       return enrichedItems;
     } catch (error) {
       logger.error("Error validating items:", error.message);
@@ -146,17 +164,17 @@ class OrderService {
    */
   static async checkStockAvailability(items) {
     try {
-      const stockCheckItems = items.map(item => ({
+      const stockCheckItems = items.map((item) => ({
         product_id: item.product_id,
         sku: item.sku,
-        quantity: item.quantity
+        quantity: item.quantity,
       }));
-      
+
       const response = await axios.post(
         `${INVENTORY_SERVICE_URL}/api/inventory/bulk-check`,
         { items: stockCheckItems }
       );
-      
+
       return response.data;
     } catch (error) {
       logger.error("Error checking stock:", error.message);
@@ -170,15 +188,15 @@ class OrderService {
   static async reserveStockForOrder(orderId, items) {
     try {
       await Promise.all(
-        items.map(item =>
+        items.map((item) =>
           axios.post(`${INVENTORY_SERVICE_URL}/api/inventory/reserve`, {
             product_id: item.product_id,
             quantity: item.quantity,
-            order_id: orderId
+            order_id: orderId,
           })
         )
       );
-      
+
       logger.info(`Stock reserved for order ${orderId}`);
     } catch (error) {
       logger.error("Error reserving stock:", error.message);
@@ -191,18 +209,18 @@ class OrderService {
    */
   static calculateOrderTotals(items) {
     const subtotal = items.reduce((sum, item) => {
-      return sum + (item.quantity * item.unit_price);
+      return sum + item.quantity * item.unit_price;
     }, 0);
-    
+
     const tax = subtotal * 0.1; // 10% tax
     const shipping = subtotal > 100 ? 0 : 10; // Free shipping over $100
     const total = subtotal + tax + shipping;
-    
+
     return {
       subtotal: parseFloat(subtotal.toFixed(2)),
       tax: parseFloat(tax.toFixed(2)),
       shipping: parseFloat(shipping.toFixed(2)),
-      total: parseFloat(total.toFixed(2))
+      total: parseFloat(total.toFixed(2)),
     };
   }
 
@@ -211,28 +229,35 @@ class OrderService {
    */
   static async updateOrderStatus(orderId, newStatus, userId = null) {
     const client = await db.getClient();
-    
+
     try {
       await client.query("BEGIN");
-      
+
       // Get current order
       const order = await Order.findById(orderId);
       if (!order) {
         throw new Error("Order not found");
       }
-      
+
       // Validate status transition
       this.validateStatusTransition(order.status, newStatus);
-      
+
       // Update status
       const updatedOrder = await Order.updateStatus(orderId, newStatus, client);
-      
+
       // Handle status-specific logic
-      await this.handleStatusChange(updatedOrder, order.status, newStatus, client);
-      
+      await this.handleStatusChange(
+        updatedOrder,
+        order.status,
+        newStatus,
+        client
+      );
+
       await client.query("COMMIT");
-      
-      logger.info(`Order ${orderId} status changed from ${order.status} to ${newStatus}`);
+
+      logger.info(
+        `Order ${orderId} status changed from ${order.status} to ${newStatus}`
+      );
       return updatedOrder;
     } catch (error) {
       await client.query("ROLLBACK");
@@ -256,11 +281,13 @@ class OrderService {
       completed: [],
       cancelled: [],
       returned: ["refunded"],
-      refunded: []
+      refunded: [],
     };
-    
+
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
-      throw new Error(`Invalid status transition from ${currentStatus} to ${newStatus}`);
+      throw new Error(
+        `Invalid status transition from ${currentStatus} to ${newStatus}`
+      );
     }
   }
 
@@ -271,50 +298,49 @@ class OrderService {
     try {
       // Get order items
       const items = await OrderItem.findByOrderId(order.id);
-      
+
       switch (newStatus) {
         case "confirmed":
           // Order confirmed - keep stock reserved
           logger.info(`Order ${order.id} confirmed - stock remains reserved`);
           break;
-          
+
         case "shipped":
           // When shipped, deduct actual stock
           await this.confirmStockDeduction(order.id, items);
           // TODO: Create shipping label, send tracking notification
           break;
-          
+
         case "cancelled":
           // Release reserved stock
           await this.releaseStockForOrder(order.id, items);
           // TODO: Process refund if payment was made
           break;
-          
+
         case "returned":
           // Return stock to inventory
           await this.returnStockForOrder(order.id, items);
           break;
-          
+
         case "completed":
           // Mark order as final
           logger.info(`Order ${order.id} completed successfully`);
           // TODO: Trigger review request, loyalty points
           break;
       }
-      
+
       // Log status change
       const logQuery = `
         INSERT INTO order_status_history (order_id, old_status, new_status, changed_at, notes)
         VALUES ($1, $2, $3, CURRENT_TIMESTAMP, $4)
       `;
-      
+
       await client.query(logQuery, [
         order.id,
         oldStatus,
         newStatus,
-        `Status changed from ${oldStatus} to ${newStatus}`
+        `Status changed from ${oldStatus} to ${newStatus}`,
       ]);
-      
     } catch (error) {
       logger.error("Error handling status change:", error);
       throw error;
@@ -327,15 +353,18 @@ class OrderService {
   static async confirmStockDeduction(orderId, items) {
     try {
       await Promise.all(
-        items.map(item =>
-          axios.post(`${INVENTORY_SERVICE_URL}/api/inventory/confirm-deduction`, {
-            product_id: item.product_id,
-            quantity: item.quantity,
-            order_id: orderId
-          })
+        items.map((item) =>
+          axios.post(
+            `${INVENTORY_SERVICE_URL}/api/inventory/confirm-deduction`,
+            {
+              product_id: item.product_id,
+              quantity: item.quantity,
+              order_id: orderId,
+            }
+          )
         )
       );
-      
+
       logger.info(`Stock deducted for shipped order ${orderId}`);
     } catch (error) {
       logger.error("Error confirming stock deduction:", error);
@@ -349,15 +378,15 @@ class OrderService {
   static async releaseStockForOrder(orderId, items) {
     try {
       await Promise.all(
-        items.map(item =>
+        items.map((item) =>
           axios.post(`${INVENTORY_SERVICE_URL}/api/inventory/release`, {
             product_id: item.product_id,
             quantity: item.quantity,
-            order_id: orderId
+            order_id: orderId,
           })
         )
       );
-      
+
       logger.info(`Stock released for cancelled order ${orderId}`);
     } catch (error) {
       logger.error("Error releasing stock:", error);
@@ -371,15 +400,15 @@ class OrderService {
   static async returnStockForOrder(orderId, items) {
     try {
       await Promise.all(
-        items.map(item =>
+        items.map((item) =>
           axios.post(`${INVENTORY_SERVICE_URL}/api/inventory/return`, {
             product_id: item.product_id,
             quantity: item.quantity,
-            order_id: orderId
+            order_id: orderId,
           })
         )
       );
-      
+
       logger.info(`Stock returned for order ${orderId}`);
     } catch (error) {
       logger.error("Error returning stock:", error);
@@ -415,22 +444,22 @@ class OrderService {
         FROM orders
         WHERE 1=1
       `;
-      
+
       const params = [];
       let paramCount = 1;
-      
+
       if (filters.start_date) {
         query += ` AND created_at >= $${paramCount}`;
         params.push(filters.start_date);
         paramCount++;
       }
-      
+
       if (filters.end_date) {
         query += ` AND created_at <= $${paramCount}`;
         params.push(filters.end_date);
         paramCount++;
       }
-      
+
       const result = await db.query(query, params);
       return result.rows[0];
     } catch (error) {

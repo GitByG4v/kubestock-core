@@ -145,10 +145,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/products/pricing"
-              element={<PricingCalculator />}
-            />
+            <Route path="/products/pricing" element={<PricingCalculator />} />
             <Route path="/categories" element={<CategoryList />} />
 
             {/* Inventory Routes */}

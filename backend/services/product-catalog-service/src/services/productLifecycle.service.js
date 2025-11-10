@@ -35,12 +35,13 @@ class ProductLifecycleService {
    */
   async createProduct(productData, createdBy) {
     const client = await db.pool.connect();
-    
+
     try {
       await client.query("BEGIN");
 
       // Generate SKU if not provided
-      const sku = productData.sku || (await this.generateSKU(productData, client));
+      const sku =
+        productData.sku || (await this.generateSKU(productData, client));
 
       // Validate SKU uniqueness
       const existingSKU = await this.checkSKUExists(sku, client);
@@ -131,10 +132,27 @@ class ProductLifecycleService {
         UPDATE products 
         SET lifecycle_state = $1, 
             updated_at = CURRENT_TIMESTAMP,
-            ${newState === ProductLifecycleService.STATES.ACTIVE ? "is_active = true," : ""}
-            ${newState === ProductLifecycleService.STATES.DISCONTINUED || newState === ProductLifecycleService.STATES.ARCHIVED ? "is_active = false," : ""}
-            approved_by = ${newState === ProductLifecycleService.STATES.APPROVED ? "$3" : "approved_by"},
-            approved_at = ${newState === ProductLifecycleService.STATES.APPROVED ? "CURRENT_TIMESTAMP" : "approved_at"}
+            ${
+              newState === ProductLifecycleService.STATES.ACTIVE
+                ? "is_active = true,"
+                : ""
+            }
+            ${
+              newState === ProductLifecycleService.STATES.DISCONTINUED ||
+              newState === ProductLifecycleService.STATES.ARCHIVED
+                ? "is_active = false,"
+                : ""
+            }
+            approved_by = ${
+              newState === ProductLifecycleService.STATES.APPROVED
+                ? "$3"
+                : "approved_by"
+            },
+            approved_at = ${
+              newState === ProductLifecycleService.STATES.APPROVED
+                ? "CURRENT_TIMESTAMP"
+                : "approved_at"
+            }
         WHERE id = $2
         RETURNING *
       `;
@@ -315,7 +333,10 @@ class ProductLifecycleService {
       const sequence = sequenceResult.rows[0].next_seq;
 
       // Generate SKU: CAT-YEAR-NNNN
-      const sku = `${categoryCode}-${year}-${String(sequence).padStart(4, "0")}`;
+      const sku = `${categoryCode}-${year}-${String(sequence).padStart(
+        4,
+        "0"
+      )}`;
 
       logger.info(`Generated SKU: ${sku}`);
       return sku;
@@ -405,7 +426,9 @@ class ProductLifecycleService {
       }
 
       await client.query("COMMIT");
-      logger.info(`Bulk approved ${results.filter((r) => r.success).length} products`);
+      logger.info(
+        `Bulk approved ${results.filter((r) => r.success).length} products`
+      );
 
       return results;
     } catch (error) {

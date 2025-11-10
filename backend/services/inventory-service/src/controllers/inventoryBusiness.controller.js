@@ -8,25 +8,25 @@ class InventoryBusinessController {
   async bulkStockCheck(req, res) {
     try {
       const { items } = req.body;
-      
+
       if (!items || !Array.isArray(items)) {
         return res.status(400).json({
           success: false,
-          message: "Items array is required"
+          message: "Items array is required",
         });
       }
-      
+
       const result = await InventoryService.bulkStockCheck(items);
-      
+
       res.json({
         success: true,
-        data: result
+        data: result,
       });
     } catch (error) {
       logger.error("Error in bulk stock check:", error);
       res.status(500).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }
@@ -37,30 +37,30 @@ class InventoryBusinessController {
   async reserveStock(req, res) {
     try {
       const { product_id, quantity, order_id } = req.body;
-      
+
       if (!product_id || !quantity || !order_id) {
         return res.status(400).json({
           success: false,
-          message: "product_id, quantity, and order_id are required"
+          message: "product_id, quantity, and order_id are required",
         });
       }
-      
+
       const inventory = await InventoryService.reserveStock(
         product_id,
         quantity,
         order_id
       );
-      
+
       res.json({
         success: true,
         message: "Stock reserved successfully",
-        data: inventory
+        data: inventory,
       });
     } catch (error) {
       logger.error("Error reserving stock:", error);
       res.status(400).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }
@@ -71,30 +71,30 @@ class InventoryBusinessController {
   async releaseStock(req, res) {
     try {
       const { product_id, quantity, order_id } = req.body;
-      
+
       if (!product_id || !quantity || !order_id) {
         return res.status(400).json({
           success: false,
-          message: "product_id, quantity, and order_id are required"
+          message: "product_id, quantity, and order_id are required",
         });
       }
-      
+
       const inventory = await InventoryService.releaseReservedStock(
         product_id,
         quantity,
         order_id
       );
-      
+
       res.json({
         success: true,
         message: "Stock released successfully",
-        data: inventory
+        data: inventory,
       });
     } catch (error) {
       logger.error("Error releasing stock:", error);
       res.status(400).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }
@@ -105,30 +105,30 @@ class InventoryBusinessController {
   async confirmDeduction(req, res) {
     try {
       const { product_id, quantity, order_id } = req.body;
-      
+
       if (!product_id || !quantity || !order_id) {
         return res.status(400).json({
           success: false,
-          message: "product_id, quantity, and order_id are required"
+          message: "product_id, quantity, and order_id are required",
         });
       }
-      
+
       const inventory = await InventoryService.confirmStockDeduction(
         product_id,
         quantity,
         order_id
       );
-      
+
       res.json({
         success: true,
         message: "Stock deducted successfully",
-        data: inventory
+        data: inventory,
       });
     } catch (error) {
       logger.error("Error confirming stock deduction:", error);
       res.status(400).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }
@@ -139,31 +139,31 @@ class InventoryBusinessController {
   async returnStock(req, res) {
     try {
       const { product_id, quantity, order_id } = req.body;
-      
+
       if (!product_id || !quantity || !order_id) {
         return res.status(400).json({
           success: false,
-          message: "product_id, quantity, and order_id are required"
+          message: "product_id, quantity, and order_id are required",
         });
       }
-      
+
       const inventory = await InventoryService.receiveStock(
         product_id,
         quantity,
         order_id,
         `Stock returned from order #${order_id}`
       );
-      
+
       res.json({
         success: true,
         message: "Stock returned successfully",
-        data: inventory
+        data: inventory,
       });
     } catch (error) {
       logger.error("Error returning stock:", error);
       res.status(400).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }
@@ -174,31 +174,31 @@ class InventoryBusinessController {
   async receiveStock(req, res) {
     try {
       const { product_id, quantity, supplier_order_id, notes } = req.body;
-      
+
       if (!product_id || !quantity || !supplier_order_id) {
         return res.status(400).json({
           success: false,
-          message: "product_id, quantity, and supplier_order_id are required"
+          message: "product_id, quantity, and supplier_order_id are required",
         });
       }
-      
+
       const inventory = await InventoryService.receiveStock(
         product_id,
         quantity,
         supplier_order_id,
         notes
       );
-      
+
       res.json({
         success: true,
         message: "Stock received successfully",
-        data: inventory
+        data: inventory,
       });
     } catch (error) {
       logger.error("Error receiving stock:", error);
       res.status(400).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }
@@ -208,8 +208,8 @@ class InventoryBusinessController {
    */
   async getLowStockAlerts(req, res) {
     try {
-      const { status = 'active' } = req.query;
-      
+      const { status = "active" } = req.query;
+
       const query = `
         SELECT 
           sa.*,
@@ -221,19 +221,19 @@ class InventoryBusinessController {
         WHERE sa.status = $1
         ORDER BY sa.created_at DESC
       `;
-      
+
       const db = require("../config/database");
       const result = await db.query(query, [status]);
-      
+
       res.json({
         success: true,
-        data: result.rows
+        data: result.rows,
       });
     } catch (error) {
       logger.error("Error getting low stock alerts:", error);
       res.status(500).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }
@@ -243,26 +243,26 @@ class InventoryBusinessController {
    */
   async getReorderSuggestions(req, res) {
     try {
-      const { status = 'pending' } = req.query;
-      
+      const { status = "pending" } = req.query;
+
       const query = `
         SELECT * FROM reorder_suggestions
         WHERE status = $1
         ORDER BY created_at DESC
       `;
-      
+
       const db = require("../config/database");
       const result = await db.query(query, [status]);
-      
+
       res.json({
         success: true,
-        data: result.rows
+        data: result.rows,
       });
     } catch (error) {
       logger.error("Error getting reorder suggestions:", error);
       res.status(500).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }
@@ -273,16 +273,16 @@ class InventoryBusinessController {
   async getAnalytics(req, res) {
     try {
       const analytics = await InventoryService.getInventoryAnalytics();
-      
+
       res.json({
         success: true,
-        data: analytics
+        data: analytics,
       });
     } catch (error) {
       logger.error("Error getting inventory analytics:", error);
       res.status(500).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }
@@ -294,21 +294,21 @@ class InventoryBusinessController {
     try {
       const { productId } = req.params;
       const { limit = 50 } = req.query;
-      
+
       const history = await InventoryService.getStockHistory(
         productId,
         parseInt(limit)
       );
-      
+
       res.json({
         success: true,
-        data: history
+        data: history,
       });
     } catch (error) {
       logger.error("Error getting stock history:", error);
       res.status(500).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }

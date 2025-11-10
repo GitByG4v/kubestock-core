@@ -18,7 +18,10 @@ router.post("/confirm-deduction", inventoryBusinessController.confirmDeduction);
 router.post("/return", inventoryBusinessController.returnStock);
 router.post("/receive", inventoryBusinessController.receiveStock);
 router.get("/alerts", inventoryBusinessController.getLowStockAlerts);
-router.get("/reorder-suggestions", inventoryBusinessController.getReorderSuggestions);
+router.get(
+  "/reorder-suggestions",
+  inventoryBusinessController.getReorderSuggestions
+);
 router.get("/analytics", inventoryBusinessController.getAnalytics);
 router.get("/history/:productId", inventoryBusinessController.getStockHistory);
 

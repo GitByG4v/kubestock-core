@@ -9,7 +9,7 @@ const PricingCalculator = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pricingResult, setPricingResult] = useState(null);
-  
+
   const [calculator, setCalculator] = useState({
     productId: "",
     quantity: 1,
@@ -87,7 +87,10 @@ const PricingCalculator = () => {
   };
 
   const addBundleItem = () => {
-    setBundleItems([...bundleItems, { productId: "", quantity: 1, customerId: "" }]);
+    setBundleItems([
+      ...bundleItems,
+      { productId: "", quantity: 1, customerId: "" },
+    ]);
   };
 
   const removeBundleItem = (index) => {
@@ -108,7 +111,8 @@ const PricingCalculator = () => {
           Dynamic Pricing Calculator
         </h1>
         <p className="text-gray-600 mt-1">
-          Calculate prices with automatic bulk discounts, promotions, and tier pricing
+          Calculate prices with automatic bulk discounts, promotions, and tier
+          pricing
         </p>
       </div>
 
@@ -132,7 +136,9 @@ const PricingCalculator = () => {
                   <option value="">Select a product...</option>
                   {products.map((product) => (
                     <option key={product.id} value={product.id}>
-                      {product.name} - ${parseFloat(product.unit_price).toFixed(2)} (SKU: {product.sku})
+                      {product.name} - $
+                      {parseFloat(product.unit_price).toFixed(2)} (SKU:{" "}
+                      {product.sku})
                     </option>
                   ))}
                 </select>
@@ -175,7 +181,10 @@ const PricingCalculator = () => {
             <h2 className="text-xl font-bold mb-4">Bundle Pricing</h2>
             <div className="space-y-4">
               {bundleItems.map((item, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg space-y-3">
+                <div
+                  key={index}
+                  className="p-4 bg-gray-50 rounded-lg space-y-3"
+                >
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Item {index + 1}</span>
                     {bundleItems.length > 1 && (
@@ -198,7 +207,8 @@ const PricingCalculator = () => {
                     <option value="">Select product...</option>
                     {products.map((product) => (
                       <option key={product.id} value={product.id}>
-                        {product.name} - ${parseFloat(product.unit_price).toFixed(2)}
+                        {product.name} - $
+                        {parseFloat(product.unit_price).toFixed(2)}
                       </option>
                     ))}
                   </select>
@@ -270,7 +280,8 @@ const PricingCalculator = () => {
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg">
                     <div className="text-sm text-purple-600">
-                      Bundle Discount ({pricingResult.bundleDiscountPercentage}%)
+                      Bundle Discount ({pricingResult.bundleDiscountPercentage}
+                      %)
                     </div>
                     <div className="text-2xl font-bold text-purple-600">
                       -${pricingResult.bundleDiscount}
@@ -291,9 +302,12 @@ const PricingCalculator = () => {
                       <div key={index} className="p-3 bg-gray-50 rounded">
                         <div className="flex justify-between items-start">
                           <div>
-                            <div className="font-medium">{item.productName}</div>
+                            <div className="font-medium">
+                              {item.productName}
+                            </div>
                             <div className="text-sm text-gray-600">
-                              Qty: {item.quantity} × ${item.basePrice} = ${item.subtotal}
+                              Qty: {item.quantity} × ${item.basePrice} = $
+                              {item.subtotal}
                             </div>
                           </div>
                           <div className="text-right">
@@ -311,7 +325,8 @@ const PricingCalculator = () => {
                           <div className="mt-2 space-y-1">
                             {item.appliedDiscounts.map((discount, i) => (
                               <div key={i} className="text-xs text-blue-600">
-                                ✓ {discount.rule}: {discount.percentage}% off (-$
+                                ✓ {discount.rule}: {discount.percentage}% off
+                                (-$
                                 {discount.amount.toFixed(2)})
                               </div>
                             ))}
@@ -380,10 +395,14 @@ const PricingCalculator = () => {
                               {discount.rule}
                             </div>
                             <div className="text-sm text-blue-700">
-                              {discount.type === "bulk" && "Quantity-based discount"}
-                              {discount.type === "promotion" && "Time-limited promotion"}
-                              {discount.type === "category" && "Category-wide discount"}
-                              {discount.type === "customer_tier" && "Customer loyalty discount"}
+                              {discount.type === "bulk" &&
+                                "Quantity-based discount"}
+                              {discount.type === "promotion" &&
+                                "Time-limited promotion"}
+                              {discount.type === "category" &&
+                                "Category-wide discount"}
+                              {discount.type === "customer_tier" &&
+                                "Customer loyalty discount"}
                             </div>
                           </div>
                           <div className="text-right">

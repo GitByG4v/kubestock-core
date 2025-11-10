@@ -45,7 +45,7 @@ class OrderController {
         data: {
           ...result.order,
           items: result.items,
-          totals: result.totals
+          totals: result.totals,
         },
       });
     } catch (error) {
@@ -165,14 +165,16 @@ class OrderController {
         "completed",
         "cancelled",
         "returned",
-        "refunded"
+        "refunded",
       ];
-      
+
       if (!validStatuses.includes(status)) {
         logger.warn(`Invalid status ${status} for order ${id}`);
         return res.status(400).json({
           success: false,
-          message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+          message: `Invalid status. Must be one of: ${validStatuses.join(
+            ", "
+          )}`,
         });
       }
 

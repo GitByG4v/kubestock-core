@@ -74,7 +74,12 @@ const OrderCreate = () => {
     }
 
     const hasValidItems = orderItems.every(
-      (item) => item.product_id && item.sku && item.product_name && item.quantity && item.unit_price
+      (item) =>
+        item.product_id &&
+        item.sku &&
+        item.product_name &&
+        item.quantity &&
+        item.unit_price
     );
     if (!hasValidItems) {
       alert("Please complete all order item details");

@@ -73,10 +73,13 @@ const ProductLifecycleManagement = () => {
 
   const handleTransition = async (productId, action) => {
     try {
-      await axios.post(`http://localhost:3002/api/products/${productId}/${action}`, {
-        userId: 1,
-        notes: `${action} action`,
-      });
+      await axios.post(
+        `http://localhost:3002/api/products/${productId}/${action}`,
+        {
+          userId: 1,
+          notes: `${action} action`,
+        }
+      );
       alert(`Product ${action} successfully!`);
       fetchData();
     } catch (error) {
@@ -377,12 +380,8 @@ const ProductLifecycleManagement = () => {
                         </div>
                       </div>
                       <div className="text-sm text-gray-500 text-right">
-                        <div>
-                          User ID: {event.changed_by}
-                        </div>
-                        <div>
-                          {new Date(event.changed_at).toLocaleString()}
-                        </div>
+                        <div>User ID: {event.changed_by}</div>
+                        <div>{new Date(event.changed_at).toLocaleString()}</div>
                       </div>
                     </div>
                   </div>
