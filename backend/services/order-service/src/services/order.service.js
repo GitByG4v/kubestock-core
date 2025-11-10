@@ -273,15 +273,12 @@ class OrderService {
    */
   static validateStatusTransition(currentStatus, newStatus) {
     const validTransitions = {
-      pending: ["confirmed", "cancelled"],
+      pending: ["confirmed", "processing", "cancelled"],
       confirmed: ["processing", "cancelled"],
       processing: ["shipped", "cancelled"],
-      shipped: ["delivered", "returned"],
-      delivered: ["completed", "returned"],
-      completed: [],
+      shipped: ["delivered", "cancelled"],
+      delivered: [],
       cancelled: [],
-      returned: ["refunded"],
-      refunded: [],
     };
 
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
@@ -342,7 +339,7 @@ class OrderService {
         `Status changed from ${oldStatus} to ${newStatus}`,
       ]);
     } catch (error) {
-      logger.error("Error handling status change:", error);
+      logger.error("Error handling status change:", error.message || error);
       throw error;
     }
   }
@@ -367,7 +364,7 @@ class OrderService {
 
       logger.info(`Stock deducted for shipped order ${orderId}`);
     } catch (error) {
-      logger.error("Error confirming stock deduction:", error);
+      logger.error("Error confirming stock deduction:", error.message || error);
       throw error;
     }
   }
@@ -389,7 +386,7 @@ class OrderService {
 
       logger.info(`Stock released for cancelled order ${orderId}`);
     } catch (error) {
-      logger.error("Error releasing stock:", error);
+      logger.error("Error releasing stock:", error.message || error);
       throw error;
     }
   }
@@ -411,7 +408,7 @@ class OrderService {
 
       logger.info(`Stock returned for order ${orderId}`);
     } catch (error) {
-      logger.error("Error returning stock:", error);
+      logger.error("Error returning stock:", error.message || error);
       throw error;
     }
   }
