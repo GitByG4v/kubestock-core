@@ -1,17 +1,17 @@
 const Order = require("../models/order.model");
 const OrderItem = require("../models/orderItem.model");
+const OrderService = require("../services/order.service");
 const logger = require("../config/logger");
 
 class OrderController {
-  // Create new order with items
+  // Create new order with items (with full business logic)
   async createOrder(req, res) {
     try {
       const {
-        user_id,
-        customer_name,
-        customer_email,
-        customer_phone,
+        customer_id,
         shipping_address,
+        payment_method,
+        payment_status,
         notes,
         items,
       } = req.body;
@@ -25,48 +25,34 @@ class OrderController {
         });
       }
 
-      // Calculate total amount
-      const total_amount = items.reduce(
-        (sum, item) => sum + item.quantity * item.unit_price,
-        0
-      );
-
-      // Create order
-      const order = await Order.create({
-        user_id,
-        customer_name,
-        customer_email,
-        customer_phone,
+      // Use OrderService for business logic
+      const result = await OrderService.createOrder({
+        customer_id,
         shipping_address,
-        total_amount,
+        payment_method,
+        payment_status,
         notes,
+        items,
       });
 
-      // Create order items
-      const itemsWithOrderId = items.map((item) => ({
-        ...item,
-        order_id: order.id,
-      }));
-
-      const createdItems = await OrderItem.createBatch(itemsWithOrderId);
-
       logger.info(
-        `Order ${order.id} created successfully with ${createdItems.length} items by user ${user_id}`
+        `Order ${result.order.id} created successfully with ${result.items.length} items`
       );
 
       res.status(201).json({
         success: true,
         message: "Order created successfully",
         data: {
-          ...order,
-          items: createdItems,
+          ...result.order,
+          items: result.items,
+          totals: result.totals
         },
       });
     } catch (error) {
       logger.error("Create order error:", error);
       res.status(500).json({
         success: false,
-        message: "Error creating order",
+        message: error.message || "Error creating order",
         error: error.message,
       });
     }
@@ -75,11 +61,11 @@ class OrderController {
   // Get all orders with filters
   async getAllOrders(req, res) {
     try {
-      const { status, user_id, limit } = req.query;
+      const { status, customer_id, limit } = req.query;
 
       const filters = {};
       if (status) filters.status = status;
-      if (user_id) filters.user_id = parseInt(user_id);
+      if (customer_id) filters.customer_id = parseInt(customer_id);
       if (limit) filters.limit = parseInt(limit);
 
       const orders = await Order.findAll(filters);
@@ -164,7 +150,7 @@ class OrderController {
     }
   }
 
-  // Update order status
+  // Update order status (with business logic)
   async updateOrderStatus(req, res) {
     try {
       const { id } = req.params;
@@ -172,30 +158,26 @@ class OrderController {
 
       const validStatuses = [
         "pending",
+        "confirmed",
         "processing",
         "shipped",
         "delivered",
+        "completed",
         "cancelled",
+        "returned",
+        "refunded"
       ];
+      
       if (!validStatuses.includes(status)) {
         logger.warn(`Invalid status ${status} for order ${id}`);
         return res.status(400).json({
           success: false,
-          message: `Invalid status. Must be one of: ${validStatuses.join(
-            ", "
-          )}`,
+          message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
         });
       }
 
-      const order = await Order.updateStatus(id, status);
-
-      if (!order) {
-        logger.warn(`Order ${id} not found for status update`);
-        return res.status(404).json({
-          success: false,
-          message: "Order not found",
-        });
-      }
+      // Use OrderService for status update with business logic
+      const order = await OrderService.updateOrderStatus(id, status);
 
       logger.info(`Order ${id} status updated to ${status}`);
 
@@ -206,9 +188,9 @@ class OrderController {
       });
     } catch (error) {
       logger.error(`Update order ${req.params.id} status error:`, error);
-      res.status(500).json({
+      res.status(400).json({
         success: false,
-        message: "Error updating order status",
+        message: error.message || "Error updating order status",
         error: error.message,
       });
     }

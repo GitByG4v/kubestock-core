@@ -4,36 +4,43 @@ const logger = require("../config/logger");
 class Order {
   static async create(orderData) {
     const {
-      user_id,
-      customer_name,
-      customer_email,
-      customer_phone,
+      customer_id,
       shipping_address,
       total_amount,
+      payment_method,
+      payment_status = "pending",
       status = "pending",
       notes,
     } = orderData;
 
+    // Generate unique order number
+    const orderNumber = `ORD-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)
+      .toUpperCase()}`;
+
     const query = `
-      INSERT INTO orders (user_id, customer_name, customer_email, customer_phone, shipping_address, total_amount, status, notes)
+      INSERT INTO orders (order_number, customer_id, shipping_address, total_amount, payment_method, payment_status, status, notes)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
     `;
 
     const values = [
-      user_id,
-      customer_name,
-      customer_email,
-      customer_phone,
+      orderNumber,
+      customer_id,
       shipping_address,
       total_amount,
+      payment_method,
+      payment_status,
       status,
       notes,
     ];
 
     try {
       const result = await db.query(query, values);
-      logger.info(`Order created with ID: ${result.rows[0].id}`);
+      logger.info(
+        `Order created with ID: ${result.rows[0].id}, Order Number: ${orderNumber}`
+      );
       return result.rows[0];
     } catch (error) {
       logger.error("Error creating order:", error);
@@ -48,9 +55,11 @@ class Order {
                json_build_object(
                  'id', oi.id,
                  'product_id', oi.product_id,
+                 'sku', oi.sku,
+                 'product_name', oi.product_name,
                  'quantity', oi.quantity,
                  'unit_price', oi.unit_price,
-                 'subtotal', oi.subtotal
+                 'total_price', oi.total_price
                )
              ) as items
       FROM orders o
@@ -67,9 +76,9 @@ class Order {
       paramCount++;
     }
 
-    if (filters.user_id) {
-      query += ` AND o.user_id = $${paramCount}`;
-      values.push(filters.user_id);
+    if (filters.customer_id) {
+      query += ` AND o.customer_id = $${paramCount}`;
+      values.push(filters.customer_id);
       paramCount++;
     }
 

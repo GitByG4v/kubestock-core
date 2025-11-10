@@ -6,6 +6,8 @@ const logger = require("./config/logger");
 const errorHandler = require("./middlewares/error.middleware");
 const categoryRoutes = require("./routes/category.routes");
 const productRoutes = require("./routes/product.routes");
+const pricingRoutes = require("./routes/pricing.routes");
+const productLifecycleRoutes = require("./routes/productLifecycle.routes");
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -28,10 +30,21 @@ app.get("/health", (req, res) => {
     success: true,
     service: "product-catalog-service",
     status: "healthy",
+    features: {
+      dynamicPricing: true,
+      lifecycleManagement: true,
+      bulkDiscounts: true,
+      approvalWorkflow: true,
+    },
     timestamp: new Date().toISOString(),
   });
 });
 
+// Business Logic Routes (Production-Grade Features)
+app.use("/api/pricing", pricingRoutes);
+app.use("/api/products", productLifecycleRoutes);
+
+// Standard CRUD Routes
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 

@@ -10,7 +10,7 @@ const OrderCreate = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    user_id: "",
+    customer_id: "",
     total_amount: "",
     shipping_address: "",
     payment_method: "credit_card",
@@ -19,7 +19,7 @@ const OrderCreate = () => {
   });
 
   const [orderItems, setOrderItems] = useState([
-    { product_id: "", quantity: "", unit_price: "" },
+    { product_id: "", sku: "", product_name: "", quantity: "", unit_price: "" },
   ]);
 
   const handleInputChange = (e) => {
@@ -47,7 +47,13 @@ const OrderCreate = () => {
   const addOrderItem = () => {
     setOrderItems([
       ...orderItems,
-      { product_id: "", quantity: "", unit_price: "" },
+      {
+        product_id: "",
+        sku: "",
+        product_name: "",
+        quantity: "",
+        unit_price: "",
+      },
     ]);
   };
 
@@ -62,13 +68,13 @@ const OrderCreate = () => {
     e.preventDefault();
 
     // Validation
-    if (!formData.user_id || !formData.total_amount) {
+    if (!formData.customer_id || !formData.total_amount) {
       alert("Please fill in all required fields");
       return;
     }
 
     const hasValidItems = orderItems.every(
-      (item) => item.product_id && item.quantity && item.unit_price
+      (item) => item.product_id && item.sku && item.product_name && item.quantity && item.unit_price
     );
     if (!hasValidItems) {
       alert("Please complete all order item details");
@@ -79,10 +85,12 @@ const OrderCreate = () => {
       setLoading(true);
       const orderData = {
         ...formData,
-        user_id: parseInt(formData.user_id),
+        customer_id: parseInt(formData.customer_id),
         total_amount: parseFloat(formData.total_amount),
         items: orderItems.map((item) => ({
           product_id: parseInt(item.product_id),
+          sku: item.sku,
+          product_name: item.product_name,
           quantity: parseInt(item.quantity),
           unit_price: parseFloat(item.unit_price),
         })),
@@ -117,13 +125,13 @@ const OrderCreate = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                label="User ID *"
-                name="user_id"
+                label="Customer ID *"
+                name="customer_id"
                 type="number"
-                value={formData.user_id}
+                value={formData.customer_id}
                 onChange={handleInputChange}
                 required
-                placeholder="Enter user ID"
+                placeholder="Enter customer ID"
               />
               <Input
                 label="Total Amount *"
@@ -208,7 +216,7 @@ const OrderCreate = () => {
               {orderItems.map((item, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg"
+                  className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 bg-gray-50 rounded-lg"
                 >
                   <Input
                     label="Product ID *"
@@ -219,6 +227,26 @@ const OrderCreate = () => {
                     }
                     required
                     placeholder="Product ID"
+                  />
+                  <Input
+                    label="SKU *"
+                    type="text"
+                    value={item.sku}
+                    onChange={(e) =>
+                      handleItemChange(index, "sku", e.target.value)
+                    }
+                    required
+                    placeholder="SKU"
+                  />
+                  <Input
+                    label="Product Name *"
+                    type="text"
+                    value={item.product_name}
+                    onChange={(e) =>
+                      handleItemChange(index, "product_name", e.target.value)
+                    }
+                    required
+                    placeholder="Product Name"
                   />
                   <Input
                     label="Quantity *"

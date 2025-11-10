@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const inventoryController = require("../controllers/inventory.controller");
+const inventoryBusinessController = require("../controllers/inventoryBusiness.controller");
 const {
   validateCreateInventory,
   validateAdjustStock,
@@ -8,6 +9,18 @@ const {
   validateReleaseStock,
   validateUpdateInventory,
 } = require("../middlewares/validation.middleware");
+
+// Business Logic Routes (must come first - most specific)
+router.post("/bulk-check", inventoryBusinessController.bulkStockCheck);
+router.post("/reserve", inventoryBusinessController.reserveStock);
+router.post("/release", inventoryBusinessController.releaseStock);
+router.post("/confirm-deduction", inventoryBusinessController.confirmDeduction);
+router.post("/return", inventoryBusinessController.returnStock);
+router.post("/receive", inventoryBusinessController.receiveStock);
+router.get("/alerts", inventoryBusinessController.getLowStockAlerts);
+router.get("/reorder-suggestions", inventoryBusinessController.getReorderSuggestions);
+router.get("/analytics", inventoryBusinessController.getAnalytics);
+router.get("/history/:productId", inventoryBusinessController.getStockHistory);
 
 // Create
 router.post("/", validateCreateInventory, inventoryController.createInventory);
@@ -28,9 +41,7 @@ router.put(
 // Delete
 router.delete("/product/:productId", inventoryController.deleteInventory);
 
-// Stock operations
+// Stock operations (legacy - kept for backwards compatibility)
 router.post("/adjust", validateAdjustStock, inventoryController.adjustStock);
-router.post("/reserve", validateReserveStock, inventoryController.reserveStock);
-router.post("/release", validateReleaseStock, inventoryController.releaseStock);
 
 module.exports = router;

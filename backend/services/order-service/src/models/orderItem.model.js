@@ -3,16 +3,23 @@ const logger = require("../config/logger");
 
 class OrderItem {
   static async create(itemData) {
-    const { order_id, product_id, quantity, unit_price } = itemData;
-    const subtotal = quantity * unit_price;
+    const { order_id, product_id, sku, product_name, quantity, unit_price } =
+      itemData;
 
     const query = `
-      INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO order_items (order_id, product_id, sku, product_name, quantity, unit_price)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `;
 
-    const values = [order_id, product_id, quantity, unit_price, subtotal];
+    const values = [
+      order_id,
+      product_id,
+      sku,
+      product_name,
+      quantity,
+      unit_price,
+    ];
 
     try {
       const result = await db.query(query, values);
@@ -32,18 +39,18 @@ class OrderItem {
 
       const createdItems = [];
       for (const item of items) {
-        const subtotal = item.quantity * item.unit_price;
         const query = `
-          INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal)
-          VALUES ($1, $2, $3, $4, $5)
+          INSERT INTO order_items (order_id, product_id, sku, product_name, quantity, unit_price)
+          VALUES ($1, $2, $3, $4, $5, $6)
           RETURNING *
         `;
         const values = [
           item.order_id,
           item.product_id,
+          item.sku,
+          item.product_name,
           item.quantity,
           item.unit_price,
-          subtotal,
         ];
         const result = await client.query(query, values);
         createdItems.push(result.rows[0]);

@@ -10,6 +10,8 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  GitBranch,
+  Calculator,
 } from "lucide-react";
 import { cn } from "../../utils/helpers";
 
@@ -32,6 +34,18 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       name: "Products",
       path: "/products",
       icon: Package,
+      roles: ["admin", "warehouse_staff", "supplier"],
+    },
+    {
+      name: "Product Lifecycle",
+      path: "/products/lifecycle",
+      icon: GitBranch,
+      roles: ["admin", "warehouse_staff"],
+    },
+    {
+      name: "Pricing Calculator",
+      path: "/products/pricing",
+      icon: Calculator,
       roles: ["admin", "warehouse_staff", "supplier"],
     },
     {

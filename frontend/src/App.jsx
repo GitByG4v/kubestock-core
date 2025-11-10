@@ -27,6 +27,8 @@ import ProductList from "./pages/products/ProductList";
 import ProductAdd from "./pages/products/ProductAdd";
 import ProductEdit from "./pages/products/ProductEdit";
 import CategoryList from "./pages/products/CategoryList";
+import ProductLifecycle from "./pages/products/ProductLifecycle";
+import PricingCalculator from "./pages/products/PricingCalculator";
 
 // Inventory Pages
 import InventoryDashboard from "./pages/inventory/InventoryDashboard";
@@ -134,6 +136,18 @@ function App() {
                   <ProductEdit />
                 </ProtectedRoute>
               }
+            />
+            <Route
+              path="/products/lifecycle"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "warehouse_staff"]}>
+                  <ProductLifecycle />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products/pricing"
+              element={<PricingCalculator />}
             />
             <Route path="/categories" element={<CategoryList />} />
 

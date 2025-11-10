@@ -87,19 +87,6 @@ class PurchaseOrderController {
   async updatePurchaseOrder(req, res) {
     try {
       const { id } = req.params;
-      const errors = validationResult(req);
-
-      if (!errors.isEmpty()) {
-        logger.warn(
-          `Purchase order ${id} update validation failed:`,
-          errors.array()
-        );
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        });
-      }
 
       const purchaseOrder = await PurchaseOrder.update(id, req.body);
 
