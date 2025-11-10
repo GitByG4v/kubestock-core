@@ -105,9 +105,11 @@ class Order {
                json_build_object(
                  'id', oi.id,
                  'product_id', oi.product_id,
+                 'product_name', oi.product_name,
+                 'sku', oi.sku,
                  'quantity', oi.quantity,
                  'unit_price', oi.unit_price,
-                 'subtotal', oi.subtotal
+                 'total_price', oi.total_price
                )
              ) as items
       FROM orders o

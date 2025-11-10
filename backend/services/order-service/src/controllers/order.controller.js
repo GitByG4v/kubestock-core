@@ -156,16 +156,14 @@ class OrderController {
       const { id } = req.params;
       const { status } = req.body;
 
+      // Must match database CHECK constraint
       const validStatuses = [
         "pending",
         "confirmed",
         "processing",
         "shipped",
         "delivered",
-        "completed",
         "cancelled",
-        "returned",
-        "refunded",
       ];
 
       if (!validStatuses.includes(status)) {
