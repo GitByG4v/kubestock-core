@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Badge from "../../components/common/Badge";
@@ -24,7 +25,7 @@ const OrderDetails = () => {
       setOrder(response.data);
     } catch (error) {
       console.error("Error fetching order details:", error);
-      alert("Failed to load order details");
+      toast.error("Failed to load order details");
     } finally {
       setLoading(false);
     }
@@ -36,7 +37,7 @@ const OrderDetails = () => {
       fetchOrderDetails();
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Failed to update order status");
+      toast.error("Failed to update order status");
     }
   };
 
@@ -47,7 +48,7 @@ const OrderDetails = () => {
         navigate("/orders");
       } catch (error) {
         console.error("Error deleting order:", error);
-        alert("Failed to delete order");
+        toast.error("Failed to delete order");
       }
     }
   };

@@ -126,7 +126,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                   cn(
                     "flex items-center px-4 py-3 rounded-lg transition-all duration-200",
                     isActive
-                      ? "bg-primary !text-white font-semibold shadow-lg"
+                      ? "bg-primary text-white! font-semibold shadow-lg"
                       : "text-primary hover:bg-dark-800 hover:text-primary"
                   )
                 }
@@ -135,10 +135,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                   <>
                     <item.icon
                       size={20}
-                      className={cn(
-                        "flex-shrink-0",
-                        isActive ? "!text-white" : ""
-                      )}
+                      className={cn("shrink-0", isActive ? "text-white!" : "")}
                     />
                     {isOpen && <span className="ml-3">{item.name}</span>}
                   </>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Table from "../../components/common/Table";
@@ -87,16 +88,18 @@ const PurchaseOrders = () => {
 
       if (editingPO) {
         await supplierService.updatePurchaseOrder(editingPO.id, poData);
-        alert("Purchase order updated successfully!");
+        toast.success("Purchase order updated successfully!");
       } else {
         await supplierService.createPurchaseOrder(poData);
-        alert("Purchase order created successfully!");
+        toast.success("Purchase order created successfully!");
       }
       resetForm();
       fetchPurchaseOrders();
     } catch (error) {
       console.error("Error saving purchase order:", error);
-      alert(error.response?.data?.message || "Failed to save purchase order");
+      toast.error(
+        error.response?.data?.message || "Failed to save purchase order"
+      );
     }
   };
 
@@ -119,7 +122,7 @@ const PurchaseOrders = () => {
       fetchPurchaseOrders();
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Failed to update status");
+      toast.error("Failed to update status");
     }
   };
 
@@ -132,7 +135,7 @@ const PurchaseOrders = () => {
         fetchPurchaseOrders();
       } catch (error) {
         console.error("Error deleting purchase order:", error);
-        alert("Failed to delete purchase order");
+        toast.error("Failed to delete purchase order");
       }
     }
   };

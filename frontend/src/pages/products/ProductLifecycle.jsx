@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "../../utils/axios";
+import toast from "react-hot-toast";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
@@ -55,7 +56,7 @@ const ProductLifecycleManagement = () => {
         ...formData,
         created_by: 1,
       });
-      alert("Product created successfully in DRAFT state!");
+      toast.success("Product created successfully in DRAFT state!");
       setShowCreateModal(false);
       setFormData({
         name: "",
@@ -67,7 +68,7 @@ const ProductLifecycleManagement = () => {
       });
       fetchData();
     } catch (error) {
-      alert("Error creating product: " + error.response?.data?.message);
+      toast.error("Error creating product: " + error.response?.data?.message);
     }
   };
 
@@ -80,10 +81,10 @@ const ProductLifecycleManagement = () => {
           notes: `${action} action`,
         }
       );
-      alert(`Product ${action} successfully!`);
+      toast.success(`Product ${action} successfully!`);
       fetchData();
     } catch (error) {
-      alert(`Error: ${error.response?.data?.message}`);
+      toast.error(`Error: ${error.response?.data?.message}`);
     }
   };
 
@@ -96,7 +97,7 @@ const ProductLifecycleManagement = () => {
       setSelectedProduct(product);
       setShowHistoryModal(true);
     } catch (error) {
-      alert("Error fetching history: " + error.message);
+      toast.error("Error fetching history: " + error.message);
     }
   };
 

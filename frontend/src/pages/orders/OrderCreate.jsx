@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
@@ -69,7 +70,7 @@ const OrderCreate = () => {
 
     // Validation
     if (!formData.customer_id || !formData.total_amount) {
-      alert("Please fill in all required fields");
+      toast("Please fill in all required fields", { icon: "⚠️" });
       return;
     }
 
@@ -82,7 +83,7 @@ const OrderCreate = () => {
         item.unit_price
     );
     if (!hasValidItems) {
-      alert("Please complete all order item details");
+      toast("Please complete all order item details", { icon: "⚠️" });
       return;
     }
 
@@ -102,11 +103,11 @@ const OrderCreate = () => {
       };
 
       await orderService.createOrder(orderData);
-      alert("Order created successfully!");
+      toast.success("Order created successfully!");
       navigate("/orders");
     } catch (error) {
       console.error("Error creating order:", error);
-      alert(error.response?.data?.message || "Failed to create order");
+      toast.error(error.response?.data?.message || "Failed to create order");
     } finally {
       setLoading(false);
     }

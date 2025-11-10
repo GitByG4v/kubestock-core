@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "../../utils/axios";
+import toast from "react-hot-toast";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
@@ -45,7 +46,7 @@ const PricingCalculator = () => {
 
   const calculatePrice = async () => {
     if (!calculator.productId) {
-      alert("Please select a product");
+      toast("Please select a product", { icon: "⚠️" });
       return;
     }
 
@@ -64,7 +65,7 @@ const PricingCalculator = () => {
       setPricingResult(res.data.data);
       scrollToResults();
     } catch (error) {
-      alert("Error calculating price: " + error.response?.data?.message);
+      toast.error("Error calculating price: " + error.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -73,7 +74,7 @@ const PricingCalculator = () => {
   const calculateBundle = async () => {
     const validItems = bundleItems.filter((item) => item.productId);
     if (validItems.length === 0) {
-      alert("Please add at least one product");
+      toast("Please add at least one product", { icon: "⚠️" });
       return;
     }
 
@@ -92,7 +93,7 @@ const PricingCalculator = () => {
       setPricingResult(res.data.data);
       scrollToResults();
     } catch (error) {
-      alert("Error calculating bundle: " + error.response?.data?.message);
+      toast.error("Error calculating bundle: " + error.response?.data?.message);
     } finally {
       setLoading(false);
     }

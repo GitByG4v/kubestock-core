@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Table from "../../components/common/Table";
@@ -10,7 +10,6 @@ import { supplierService } from "../../services/supplierService";
 import { FiPlus, FiEdit, FiTrash2, FiMail, FiPhone } from "react-icons/fi";
 
 const SupplierList = () => {
-  const navigate = useNavigate();
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -63,16 +62,16 @@ const SupplierList = () => {
     try {
       if (editingSupplier) {
         await supplierService.updateSupplier(editingSupplier.id, formData);
-        alert("Supplier updated successfully!");
+        toast.success("Supplier updated successfully!");
       } else {
         await supplierService.createSupplier(formData);
-        alert("Supplier created successfully!");
+        toast.success("Supplier created successfully!");
       }
       resetForm();
       fetchSuppliers();
     } catch (error) {
       console.error("Error saving supplier:", error);
-      alert(error.response?.data?.message || "Failed to save supplier");
+      toast.error(error.response?.data?.message || "Failed to save supplier");
     }
   };
 
@@ -96,7 +95,7 @@ const SupplierList = () => {
         fetchSuppliers();
       } catch (error) {
         console.error("Error deleting supplier:", error);
-        alert("Failed to delete supplier");
+        toast.error("Failed to delete supplier");
       }
     }
   };

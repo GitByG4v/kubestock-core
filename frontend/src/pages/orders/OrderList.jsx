@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Table from "../../components/common/Table";
@@ -41,7 +42,7 @@ const OrderList = () => {
       fetchOrders();
     } catch (error) {
       console.error("Error updating order status:", error);
-      alert("Failed to update order status");
+      toast.error("Failed to update order status");
     }
   };
 
@@ -52,7 +53,7 @@ const OrderList = () => {
         fetchOrders();
       } catch (error) {
         console.error("Error deleting order:", error);
-        alert("Failed to delete order");
+        toast.error("Failed to delete order");
       }
     }
   };
