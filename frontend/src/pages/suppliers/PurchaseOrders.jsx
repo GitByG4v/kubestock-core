@@ -122,7 +122,23 @@ const PurchaseOrders = () => {
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      await supplierService.updatePOStatus(id, newStatus);
+      // If marking as received, use the special endpoint that updates inventory
+      if (newStatus === "received") {
+        await fetch(`http://localhost:3004/api/purchase-orders/${id}/receive`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            notes: "Shipment received by warehouse",
+          }),
+        });
+        toast.success("Order received! Inventory has been updated.");
+      } else {
+        await supplierService.updatePOStatus(id, newStatus);
+        toast.success(`Status updated to ${newStatus}`);
+      }
       fetchPurchaseOrders();
     } catch (error) {
       console.error("Error updating status:", error);
@@ -206,31 +222,22 @@ const PurchaseOrders = () => {
           <Button size="sm" variant="outline" onClick={() => handleEdit(row)}>
             <FiEdit className="mr-1" /> Edit
           </Button>
-          {row.status === "pending" && (
+          {row.status === "confirmed" && (
             <Button
               size="sm"
               variant="primary"
-              onClick={() => handleStatusUpdate(row.id, "approved")}
+              onClick={() => handleStatusUpdate(row.id, "preparing")}
             >
-              Approve
+              Mark Preparing
             </Button>
           )}
-          {row.status === "approved" && (
-            <Button
-              size="sm"
-              variant="primary"
-              onClick={() => handleStatusUpdate(row.id, "ordered")}
-            >
-              Order
-            </Button>
-          )}
-          {row.status === "ordered" && (
+          {row.status === "shipped" && (
             <Button
               size="sm"
               variant="success"
               onClick={() => handleStatusUpdate(row.id, "received")}
             >
-              Receive
+              Confirm Receipt
             </Button>
           )}
           {canManagePO && (

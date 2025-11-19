@@ -1,5 +1,9 @@
 const PurchaseOrder = require("../models/purchaseOrder.model");
 const logger = require("../config/logger");
+const axios = require("axios");
+
+const INVENTORY_SERVICE_URL =
+  process.env.INVENTORY_SERVICE_URL || "http://localhost:3003";
 
 class PurchaseOrderController {
   async createPurchaseOrder(req, res) {
@@ -324,7 +328,23 @@ class PurchaseOrderController {
   async confirmReceipt(req, res) {
     try {
       const { id } = req.params;
-      const { received_items, notes } = req.body;
+      const { notes } = req.body;
+
+      // Get the purchase order first
+      const purchaseOrder = await PurchaseOrder.findById(id);
+      if (!purchaseOrder) {
+        return res.status(404).json({
+          success: false,
+          message: "Purchase order not found",
+        });
+      }
+
+      // Get purchase order items
+      const db = require("../config/database");
+      const itemsResult = await db.query(
+        "SELECT product_id, sku, quantity FROM purchase_order_items WHERE po_id = $1",
+        [id]
+      );
 
       const updateData = {
         status: "received",
@@ -334,12 +354,45 @@ class PurchaseOrderController {
 
       const updatedPO = await PurchaseOrder.update(id, updateData);
 
+      // Update inventory for each product
+      let inventoryUpdatesSuccessful = true;
+      const inventoryErrors = [];
+
+      for (const item of itemsResult.rows) {
+        try {
+          await axios.post(`${INVENTORY_SERVICE_URL}/api/inventory/adjust`, {
+            product_id: item.product_id,
+            sku: item.sku,
+            quantity: item.quantity,
+            movement_type: "in",
+            notes: `Received from PO ${purchaseOrder.po_number}`,
+          });
+          logger.info(
+            `Inventory updated for product ${item.product_id}: +${item.quantity} units`
+          );
+        } catch (inventoryError) {
+          inventoryUpdatesSuccessful = false;
+          inventoryErrors.push({
+            product_id: item.product_id,
+            error: inventoryError.message,
+          });
+          logger.error(
+            `Failed to update inventory for product ${item.product_id}:`,
+            inventoryError
+          );
+        }
+      }
+
       logger.info(`Purchase order ${id} marked as received`);
 
       res.json({
         success: true,
         message: "Purchase order receipt confirmed",
         data: updatedPO,
+        inventory_updates: {
+          successful: inventoryUpdatesSuccessful,
+          errors: inventoryErrors.length > 0 ? inventoryErrors : undefined,
+        },
       });
     } catch (error) {
       logger.error("Confirm receipt error:", error);
