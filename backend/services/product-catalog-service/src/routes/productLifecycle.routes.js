@@ -1,10 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const ProductLifecycleController = require("../controllers/productLifecycle.controller");
+const {
+  authMiddleware,
+  authorizeRoles,
+} = require("../middleware/auth.middleware");
 
 /**
  * Production-Grade Product Lifecycle Routes
  * All lifecycle management and approval workflow endpoints
+ *
+ * BUSINESS LOGIC ROLE SEPARATION:
+ * - Admin: Full product lifecycle control (approve, activate, discontinue, archive)
+ * - Warehouse Staff: Create drafts, submit for approval, request discontinuation
+ * - Supplier: View only
  */
 
 // ============================================================================
@@ -14,18 +23,28 @@ const ProductLifecycleController = require("../controllers/productLifecycle.cont
 /**
  * @route   POST /api/products/lifecycle
  * @desc    Create new product with lifecycle management (starts in DRAFT)
- * @access  Public
+ * @access  Admin, Warehouse Staff
  * @body    { name, category_id, unit_price, sku, ... }
  */
-router.post("/lifecycle", ProductLifecycleController.createProduct);
+router.post(
+  "/lifecycle",
+  authMiddleware,
+  authorizeRoles("admin", "warehouse_staff"),
+  ProductLifecycleController.createProduct
+);
 
 /**
  * @route   POST /api/products/:id/transition
  * @desc    Transition product to new lifecycle state
- * @access  Admin
+ * @access  Admin Only
  * @body    { newState, notes, userId }
  */
-router.post("/:id/transition", ProductLifecycleController.transitionState);
+router.post(
+  "/:id/transition",
+  authMiddleware,
+  authorizeRoles("admin"),
+  ProductLifecycleController.transitionState
+);
 
 // ============================================================================
 // APPROVAL WORKFLOW ENDPOINTS
@@ -34,39 +53,53 @@ router.post("/:id/transition", ProductLifecycleController.transitionState);
 /**
  * @route   GET /api/products/pending-approvals
  * @desc    Get all products pending approval
- * @access  Admin
+ * @access  Admin Only
  */
 router.get(
   "/pending-approvals",
+  authMiddleware,
+  authorizeRoles("admin"),
   ProductLifecycleController.getPendingApprovals
 );
 
 /**
  * @route   POST /api/products/:id/submit-for-approval
  * @desc    Submit product for approval (draft → pending_approval)
- * @access  Public
+ * @access  Admin, Warehouse Staff
  * @body    { userId, notes }
  */
 router.post(
   "/:id/submit-for-approval",
+  authMiddleware,
+  authorizeRoles("admin", "warehouse_staff"),
   ProductLifecycleController.submitForApproval
 );
 
 /**
  * @route   POST /api/products/:id/approve
  * @desc    Approve product (pending_approval → approved)
- * @access  Admin
+ * @access  Admin Only
  * @body    { userId, notes }
  */
-router.post("/:id/approve", ProductLifecycleController.approveProduct);
+router.post(
+  "/:id/approve",
+  authMiddleware,
+  authorizeRoles("admin"),
+  ProductLifecycleController.approveProduct
+);
 
 /**
  * @route   POST /api/products/bulk-approve
  * @desc    Bulk approve multiple products
- * @access  Admin
+ * @access  Admin Only
  * @body    { productIds: [1, 2, 3], userId, notes }
  */
-router.post("/bulk-approve", ProductLifecycleController.bulkApprove);
+router.post(
+  "/bulk-approve",
+  authMiddleware,
+  authorizeRoles("admin"),
+  ProductLifecycleController.bulkApprove
+);
 
 // ============================================================================
 // STATE MANAGEMENT SHORTCUTS
@@ -75,26 +108,41 @@ router.post("/bulk-approve", ProductLifecycleController.bulkApprove);
 /**
  * @route   POST /api/products/:id/activate
  * @desc    Activate product (make available for sale)
- * @access  Admin
+ * @access  Admin Only
  * @body    { userId, notes }
  */
-router.post("/:id/activate", ProductLifecycleController.activateProduct);
+router.post(
+  "/:id/activate",
+  authMiddleware,
+  authorizeRoles("admin"),
+  ProductLifecycleController.activateProduct
+);
 
 /**
  * @route   POST /api/products/:id/discontinue
  * @desc    Discontinue product (stop selling)
- * @access  Admin
+ * @access  Admin Only
  * @body    { userId, notes }
  */
-router.post("/:id/discontinue", ProductLifecycleController.discontinueProduct);
+router.post(
+  "/:id/discontinue",
+  authMiddleware,
+  authorizeRoles("admin"),
+  ProductLifecycleController.discontinueProduct
+);
 
 /**
  * @route   POST /api/products/:id/archive
  * @desc    Archive product (permanently remove from active catalog)
- * @access  Admin
+ * @access  Admin Only
  * @body    { userId, notes }
  */
-router.post("/:id/archive", ProductLifecycleController.archiveProduct);
+router.post(
+  "/:id/archive",
+  authMiddleware,
+  authorizeRoles("admin"),
+  ProductLifecycleController.archiveProduct
+);
 
 // ============================================================================
 // LIFECYCLE QUERY ENDPOINTS
@@ -123,8 +171,13 @@ router.get(
 /**
  * @route   GET /api/products/lifecycle-stats
  * @desc    Get statistics for product lifecycle states
- * @access  Admin
+ * @access  Admin Only
  */
-router.get("/lifecycle-stats", ProductLifecycleController.getLifecycleStats);
+router.get(
+  "/lifecycle-stats",
+  authMiddleware,
+  authorizeRoles("admin"),
+  ProductLifecycleController.getLifecycleStats
+);
 
 module.exports = router;

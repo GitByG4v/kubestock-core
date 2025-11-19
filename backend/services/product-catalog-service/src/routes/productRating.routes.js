@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const productRatingController = require("../controllers/productRating.controller");
-const authMiddleware = require("../middleware/auth.middleware");
+const { authMiddleware } = require("../middleware/auth.middleware");
 
 // Supplier routes (protected)
 router.post(
