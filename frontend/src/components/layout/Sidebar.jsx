@@ -37,19 +37,19 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       name: "Products",
       path: "/products",
       icon: Package,
-      roles: ["admin", "warehouse_staff", "supplier"],
+      roles: ["admin", "warehouse_staff"],
     },
     {
       name: "Product Lifecycle",
       path: "/products/lifecycle",
       icon: GitBranch,
-      roles: ["admin", "warehouse_staff"],
+      roles: ["admin"],
     },
     {
       name: "Pricing Calculator",
       path: "/products/pricing",
       icon: Calculator,
-      roles: ["admin", "warehouse_staff", "supplier"],
+      roles: ["admin", "warehouse_staff"],
     },
     {
       name: "Categories",

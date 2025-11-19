@@ -1,10 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const PricingController = require("../controllers/pricing.controller");
+const {
+  authMiddleware,
+  authorizeRoles,
+} = require("../middleware/auth.middleware");
 
 /**
  * Production-Grade Pricing Routes
  * All advanced pricing business logic endpoints
+ * RESTRICTED: Admin and Warehouse Staff only
+ * Suppliers should NOT have access to pricing logic (business intelligence protection)
  */
 
 // ============================================================================
@@ -14,26 +20,41 @@ const PricingController = require("../controllers/pricing.controller");
 /**
  * @route   POST /api/pricing/calculate
  * @desc    Calculate price with all applicable discounts
- * @access  Public
+ * @access  Admin, Warehouse Staff Only
  * @body    { productId, quantity, customerId }
  */
-router.post("/calculate", PricingController.calculatePrice);
+router.post(
+  "/calculate",
+  authMiddleware,
+  authorizeRoles("admin", "warehouse_staff"),
+  PricingController.calculatePrice
+);
 
 /**
  * @route   POST /api/pricing/calculate-bundle
  * @desc    Calculate bundle pricing for multiple products
- * @access  Public
+ * @access  Admin, Warehouse Staff Only
  * @body    { items: [{ productId, quantity, customerId }] }
  */
-router.post("/calculate-bundle", PricingController.calculateBundlePrice);
+router.post(
+  "/calculate-bundle",
+  authMiddleware,
+  authorizeRoles("admin", "warehouse_staff"),
+  PricingController.calculateBundlePrice
+);
 
 /**
  * @route   POST /api/pricing/compare
  * @desc    Compare our price with competitors
- * @access  Public
+ * @access  Admin, Warehouse Staff Only
  * @body    { productId, competitorPrices: [{ name, price }] }
  */
-router.post("/compare", PricingController.compareCompetitors);
+router.post(
+  "/compare",
+  authMiddleware,
+  authorizeRoles("admin", "warehouse_staff"),
+  PricingController.compareCompetitors
+);
 
 // ============================================================================
 // PRICING RULES MANAGEMENT ENDPOINTS
@@ -42,26 +63,41 @@ router.post("/compare", PricingController.compareCompetitors);
 /**
  * @route   GET /api/pricing/rules
  * @desc    Get all pricing rules with optional filters
- * @access  Public
+ * @access  Admin, Warehouse Staff Only
  * @query   rule_type, is_active
  */
-router.get("/rules", PricingController.getAllPricingRules);
+router.get(
+  "/rules",
+  authMiddleware,
+  authorizeRoles("admin", "warehouse_staff"),
+  PricingController.getAllPricingRules
+);
 
 /**
  * @route   POST /api/pricing/rules
  * @desc    Create new pricing rule
- * @access  Admin
+ * @access  Admin Only
  * @body    { rule_name, rule_type, product_id, category_id, discount_percentage, ... }
  */
-router.post("/rules", PricingController.createPricingRule);
+router.post(
+  "/rules",
+  authMiddleware,
+  authorizeRoles("admin"),
+  PricingController.createPricingRule
+);
 
 /**
  * @route   PUT /api/pricing/rules/:id
  * @desc    Update pricing rule
- * @access  Admin
+ * @access  Admin Only
  * @body    { rule_name, discount_percentage, is_active, ... }
  */
-router.put("/rules/:id", PricingController.updatePricingRule);
+router.put(
+  "/rules/:id",
+  authMiddleware,
+  authorizeRoles("admin"),
+  PricingController.updatePricingRule
+);
 
 // ============================================================================
 // ANALYTICS ENDPOINTS
@@ -70,9 +106,14 @@ router.put("/rules/:id", PricingController.updatePricingRule);
 /**
  * @route   GET /api/pricing/history/:productId
  * @desc    Get price history for a product
- * @access  Public
+ * @access  Admin, Warehouse Staff Only
  * @query   days (default: 30)
  */
-router.get("/history/:productId", PricingController.getPriceHistory);
+router.get(
+  "/history/:productId",
+  authMiddleware,
+  authorizeRoles("admin", "warehouse_staff"),
+  PricingController.getPriceHistory
+);
 
 module.exports = router;

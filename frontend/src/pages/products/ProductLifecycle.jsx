@@ -128,12 +128,10 @@ const ProductLifecycleManagement = () => {
     const actions = allActions[state] || [];
 
     // Filter actions based on role
-    // Warehouse staff can only submit for approval and discontinue
-    // Only admins can approve and activate
+    // Only admins can perform lifecycle actions (approve, activate, discontinue, archive)
+    // Warehouse staff can only create drafts and submit for approval (handled in creation flow)
     if (!isAdmin) {
-      return actions.filter(
-        (action) => action === "submit-for-approval" || action === "discontinue"
-      );
+      return [];
     }
 
     return actions;

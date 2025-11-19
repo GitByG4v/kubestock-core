@@ -126,9 +126,7 @@ function App() {
             <Route
               path="/products"
               element={
-                <ProtectedRoute
-                  allowedRoles={["admin", "warehouse_staff", "supplier"]}
-                >
+                <ProtectedRoute allowedRoles={["admin", "warehouse_staff"]}>
                   <ProductList />
                 </ProtectedRoute>
               }
@@ -152,7 +150,7 @@ function App() {
             <Route
               path="/products/lifecycle"
               element={
-                <ProtectedRoute allowedRoles={["admin", "warehouse_staff"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <ProductLifecycle />
                 </ProtectedRoute>
               }
@@ -160,9 +158,7 @@ function App() {
             <Route
               path="/products/pricing"
               element={
-                <ProtectedRoute
-                  allowedRoles={["admin", "warehouse_staff", "supplier"]}
-                >
+                <ProtectedRoute allowedRoles={["admin", "warehouse_staff"]}>
                   <PricingCalculator />
                 </ProtectedRoute>
               }
