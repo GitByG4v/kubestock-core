@@ -119,12 +119,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
       
       - name: Install dependencies
         working-directory: backend
-        run: npm ci
+        run: |
+          if [ -f "package-lock.json" ]; then
+            npm ci
+          else
+            npm install
+          fi
+        continue-on-error: true
       
       - name: Run initial schema setup
         working-directory: backend

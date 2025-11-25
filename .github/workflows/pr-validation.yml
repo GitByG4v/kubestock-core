@@ -230,7 +230,11 @@ jobs:
             if [ -f "$service/package.json" ]; then
               echo "Testing $service..."
               cd "$service"
-              npm ci
+              if [ -f "package-lock.json" ]; then
+                npm ci
+              else
+                npm install
+              fi
               npm test || echo "Tests incomplete for $service"
               cd -
             fi

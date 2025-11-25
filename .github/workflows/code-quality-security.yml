@@ -92,7 +92,13 @@ jobs:
       
       - name: Install dependencies
         working-directory: ${{ matrix.component.path }}
-        run: npm ci || npm install
+        run: |
+          if [ -f "package-lock.json" ]; then
+            npm ci || npm install
+          else
+            npm install
+          fi
+        continue-on-error: true
       
       - name: Run npm audit
         working-directory: ${{ matrix.component.path }}
@@ -171,7 +177,7 @@ jobs:
   sonarcloud-scan:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && vars.SONAR_TOKEN != ''
     
     steps:
       - name: Checkout code

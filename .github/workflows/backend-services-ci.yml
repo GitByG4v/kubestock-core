@@ -57,12 +57,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: backend/services/${{ matrix.service.name }}/package-lock.json
       
       - name: Install dependencies
         working-directory: backend/services/${{ matrix.service.name }}
-        run: npm ci
+        run: |
+          if [ -f "package-lock.json" ]; then
+            npm ci
+          else
+            npm install
+          fi
       
       - name: Create test environment file
         working-directory: backend/services/${{ matrix.service.name }}
