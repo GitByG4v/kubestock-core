@@ -44,12 +44,8 @@ async function verifyToken(token) {
       },
       (err, decoded) => {
         if (err) {
-          console.error("❌ [Token Verify] JWT verification failed:");
-          console.error("  Error name:", err.name);
-          console.error("  Error message:", err.message);
           return reject(err);
         }
-        console.log("✅ [Token Verify] JWT decoded successfully");
         resolve(decoded);
       }
     );
@@ -81,15 +77,7 @@ const authenticateAsgardeo = async (req, res, next) => {
     // Extract token from Authorization header
     const authHeader = req.headers.authorization;
 
-    console.log("🔐 [Asgardeo Auth] Incoming request");
-    console.log("  Headers present:", !!req.headers);
-    console.log(
-      "  Authorization header:",
-      authHeader ? `Bearer ${authHeader.substring(7, 50)}...` : "Missing"
-    );
-
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.log("❌ [Asgardeo Auth] No Bearer token in header");
       return res.status(401).json({
         success: false,
         message: "No access token provided",
@@ -97,22 +85,9 @@ const authenticateAsgardeo = async (req, res, next) => {
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    console.log("🔍 [Asgardeo Auth] Token extracted, length:", token.length);
-    console.log(
-      "🔍 [Asgardeo Auth] Token preview:",
-      token.substring(0, 50) + "..."
-    );
 
     // Verify token
-    console.log("⚙️  [Asgardeo Auth] Starting token verification...");
-    console.log("  Issuer:", asgardeo.issuer);
-    console.log("  Audience:", asgardeo.audience);
-    console.log("  JWKS URI:", asgardeo.jwksUri);
-
     const decoded = await verifyToken(token);
-    console.log("✅ [Asgardeo Auth] Token verified successfully");
-    console.log("  Subject:", decoded.sub);
-    console.log("  Username:", decoded.username);
 
     // Get additional user info from userinfo endpoint
     const userInfo = await getUserInfo(token);
@@ -131,13 +106,10 @@ const authenticateAsgardeo = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error("❌ [Asgardeo Auth] Authentication failed");
-    console.error("  Error name:", error.name);
-    console.error("  Error message:", error.message);
-    console.error("  Error stack:", error.stack);
+    // Log errors for debugging (keep minimal logging)
+    console.error("[Asgardeo Auth] Failed:", error.name, error.message);
 
     if (error.name === "TokenExpiredError") {
-      console.log("  Reason: Token has expired");
       return res.status(401).json({
         success: false,
         message: "Access token has expired",
@@ -146,7 +118,6 @@ const authenticateAsgardeo = async (req, res, next) => {
     }
 
     if (error.name === "JsonWebTokenError") {
-      console.log("  Reason: JWT validation error -", error.message);
       return res.status(401).json({
         success: false,
         message: "Invalid access token",
@@ -154,7 +125,6 @@ const authenticateAsgardeo = async (req, res, next) => {
       });
     }
 
-    console.log("  Reason: Unknown error");
     return res.status(401).json({
       success: false,
       message: "Authentication failed",
