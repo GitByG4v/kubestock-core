@@ -9,7 +9,7 @@ class ProductRatingController {
     try {
       const { productId } = req.params;
       const { rating, review } = req.body;
-      
+
       // Get supplier ID from authenticated user (supports Asgardeo and legacy auth)
       const supplierId = await getSupplierIdFromUser(req.user);
 

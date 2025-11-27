@@ -140,7 +140,7 @@ class AuthController {
       if (userEmail) {
         user = await User.findByEmail(userEmail);
       }
-      
+
       // Fallback to user_id lookup (for legacy users)
       if (!user && userId) {
         user = await User.findById(userId);
@@ -178,7 +178,7 @@ class AuthController {
   async updateProfile(req, res) {
     try {
       const { full_name, username } = req.body;
-      
+
       // Get user ID using email-first lookup
       const userEmail = req.user.email || req.user.username;
       let userId = req.user.id;
@@ -191,14 +191,14 @@ class AuthController {
       if (!user && userId) {
         user = await User.findById(userId);
       }
-      
+
       if (!user) {
         return res.status(404).json({
           success: false,
           message: "User not found",
         });
       }
-      
+
       // Use the database ID for update
       userId = user.id;
 
@@ -241,7 +241,7 @@ class AuthController {
   async changePassword(req, res) {
     try {
       const { current_password, new_password } = req.body;
-      
+
       // Get user using email-first lookup
       const userEmail = req.user.email || req.user.username;
       let userId = req.user.id;
@@ -253,14 +253,14 @@ class AuthController {
       if (!user && userId) {
         user = await User.findById(userId);
       }
-      
+
       if (!user) {
         return res.status(404).json({
           success: false,
           message: "User not found",
         });
       }
-      
+
       // Use the database ID
       userId = user.id;
 
