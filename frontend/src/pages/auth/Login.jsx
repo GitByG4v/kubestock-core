@@ -2,172 +2,110 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AsgardeoAuthContext";
 import Button from "../../components/common/Button";
-import Input from "../../components/common/Input";
-import { LogIn, Shield } from "lucide-react";
+import { Shield } from "lucide-react";
 
 const Login = () => {
   const { login, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
 
   // Redirect if already authenticated
   useEffect(() => {
-    console.log("🔍 Checking auth status:", { isAuthenticated, user });
+    console.log("🔍 Login useEffect - Checking auth:", { isAuthenticated, user: user?.username, role: user?.role });
     if (isAuthenticated && user) {
-      console.log("✅ User is authenticated, redirecting...");
       const role = user.role;
+      console.log("✅ User is authenticated, redirecting to dashboard for role:", role);
       if (role === "admin") {
-        navigate("/dashboard/admin");
+        console.log("  → Navigating to /dashboard/admin");
+        navigate("/dashboard/admin", { replace: true });
       } else if (role === "warehouse_staff") {
-        navigate("/dashboard/warehouse");
+        console.log("  → Navigating to /dashboard/warehouse");
+        navigate("/dashboard/warehouse", { replace: true });
       } else if (role === "supplier") {
-        navigate("/dashboard/supplier");
+        console.log("  → Navigating to /dashboard/supplier");
+        navigate("/dashboard/supplier", { replace: true });
       } else {
-        navigate("/products");
+        console.log("  → Navigating to /products");
+        navigate("/products", { replace: true });
       }
+    } else {
+      console.log("⏳ Not redirecting - isAuthenticated:", isAuthenticated, "user:", !!user);
     }
   }, [isAuthenticated, user, navigate]);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    // Clear error for this field
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: "" });
-    }
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
-    }
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    }
-    return newErrors;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("🔐 Login form submitted");
-
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      console.log("❌ Validation errors:", validationErrors);
-      setErrors(validationErrors);
-      return;
-    }
-
+  const handleAsgardeoLogin = async () => {
+    console.log("🚀 Starting Asgardeo login...");
+    console.log("  Current URL:", window.location.href);
+    console.log("  Current Origin:", window.location.origin);
     setLoading(true);
     try {
-      console.log("🚀 Calling login function...");
-      await login(formData);
-      console.log("✅ Login function completed");
+      console.log("  Calling login() function...");
+      await login();
+      console.log("  Login() completed successfully");
     } catch (error) {
-      console.error("❌ Login error in component:", error);
-      console.error("  Error type:", typeof error);
+      console.error("❌ Login error:", error);
       console.error("  Error details:", {
-        name: error?.name,
-        message: error?.message,
-        stack: error?.stack,
-      });
-      setErrors({
-        general: error.message || "Login failed. Please try again.",
+        message: error.message,
+        stack: error.stack,
+        name: error.name
       });
     } finally {
       setLoading(false);
-      console.log("🏁 Login process finished");
+      console.log("  Login process finished");
     }
   };
 
   return (
-    <div>
+    <div className="max-w-md mx-auto">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-dark-900">Welcome Back!</h2>
-        <p className="text-dark-600 mt-2">
-          Sign in to your account to continue
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit}>
-        <Input
-          label="Email Address"
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          error={errors.email}
-          placeholder="Enter your email"
-          required
-        />
-
-        <Input
-          label="Password"
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          error={errors.password}
-          placeholder="Enter your password"
-          required
-        />
-
-        <div className="flex items-center justify-between mb-6">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              className="rounded border-dark-300 text-primary focus:ring-primary"
-            />
-            <span className="ml-2 text-sm text-dark-600">Remember me</span>
-          </label>
-          <Link
-            to="/forgot-password"
-            className="text-sm text-primary hover:text-primary-700"
-          >
-            Forgot password?
-          </Link>
+        <div className="flex justify-center mb-4">
+          <div className="p-3 bg-primary-100 rounded-full">
+            <Shield className="w-8 h-8 text-primary-600" />
+          </div>
         </div>
-
-        <Button
-          type="submit"
-          variant="primary"
-          className="w-full"
-          loading={loading}
-        >
-          <LogIn size={18} className="mr-2" />
-          Sign In
-        </Button>
-      </form>
-
-      <div className="mt-6 text-center">
-        <p className="text-sm text-dark-600">
-          Don't have an account?{" "}
-          <Link
-            to="/register"
-            className="text-primary hover:text-primary-700 font-medium"
-          >
-            Sign up
-          </Link>
+        <h2 className="text-2xl font-bold text-dark-900">Welcome Back</h2>
+        <p className="text-dark-600 mt-2">
+          Secure authentication with Asgardeo
         </p>
       </div>
 
-      {/* Demo Credentials */}
-      <div className="mt-6 p-4 bg-dark-100 rounded-lg">
-        <p className="text-xs font-semibold text-dark-700 mb-2">
-          Demo Credentials:
-        </p>
-        <p className="text-xs text-dark-600">Email: admin@ims.com</p>
-        <p className="text-xs text-dark-600">Password: admin123</p>
+      <div className="bg-white p-8 rounded-xl shadow-sm border border-dark-200">
+        <div className="space-y-6">
+          <div className="text-center p-6 bg-primary-50 rounded-lg">
+            <h3 className="text-lg font-semibold text-dark-900 mb-2">
+              Sign In with Asgardeo
+            </h3>
+            <p className="text-dark-600 mb-4">
+              This application uses WSO2 Asgardeo for secure authentication.
+              Click below to sign in through Asgardeo.
+            </p>
+            <Button
+              onClick={handleAsgardeoLogin}
+              variant="primary"
+              className="w-full flex items-center justify-center gap-2"
+              loading={loading}
+            >
+              <Shield className="w-5 h-5" />
+              {loading ? "Redirecting..." : "Sign In with Asgardeo"}
+            </Button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-dark-600">
+              Don't have an account?{" "}
+              <Link
+                to="/register"
+                className="text-primary-600 hover:text-primary-700 font-medium"
+              >
+                Sign Up
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 text-center text-sm text-dark-500">
+        <p>© 2025 Inventory Management System. All rights reserved.</p>
       </div>
     </div>
   );

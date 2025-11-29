@@ -9,6 +9,7 @@ import { AuthProvider as AsgardeoAuthProvider } from "@asgardeo/auth-react";
 import { AuthProvider } from "./context/AsgardeoAuthContext";
 import asgardeoConfig from "./config/asgardeo.config";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import RootRedirect from "./components/auth/RootRedirect";
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -18,6 +19,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import Callback from "./pages/auth/Callback";
 
 // Dashboard Pages
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
@@ -52,6 +54,8 @@ import OrderCreate from "./pages/orders/OrderCreate";
 // System Pages
 import HealthMonitoring from "./pages/system/HealthMonitoring";
 import NotFound from "./pages/NotFound";
+
+console.log("🚀 App.jsx - Initializing Asgardeo with config:", asgardeoConfig);
 
 function App() {
   return (
@@ -89,6 +93,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/callback" element={<Callback />} />
             </Route>
 
             {/* Protected Routes */}
@@ -281,7 +286,7 @@ function App() {
             </Route>
 
             {/* Redirects */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<RootRedirect />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

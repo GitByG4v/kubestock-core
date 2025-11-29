@@ -26,6 +26,11 @@ const baseUrl =
 const clientID = import.meta.env.VITE_ASGARDEO_CLIENT_ID;
 const redirectURL = import.meta.env.VITE_APP_URL || "http://localhost:5173";
 
+console.log("🔍 Asgardeo Config Values:");
+console.log("  baseUrl:", baseUrl);
+console.log("  clientID:", clientID);
+console.log("  redirectURL:", redirectURL);
+
 if (!clientID) {
   console.error(
     "❌ VITE_ASGARDEO_CLIENT_ID is not set in environment variables!"
@@ -42,6 +47,9 @@ export const asgardeoConfig = {
   // Redirect URLs
   signInRedirectURL: redirectURL,
   signOutRedirectURL: redirectURL,
+
+  // Debug
+  _debug: true,
 
   // OAuth scopes
   scope: ["openid", "profile", "email", "groups"],
@@ -65,6 +73,8 @@ export const asgardeoConfig = {
 console.log("✅ Asgardeo Config Created:");
 console.log("  Base URL:", asgardeoConfig.baseUrl);
 console.log("  Client ID:", asgardeoConfig.clientID ? "Set ✓" : "Missing ✗");
-console.log("  Redirect URL:", asgardeoConfig.signInRedirectURL);
+console.log("  Sign In Redirect URL:", asgardeoConfig.signInRedirectURL);
+console.log("  Sign Out Redirect URL:", asgardeoConfig.signOutRedirectURL);
+console.log("  Full Config:", JSON.stringify(asgardeoConfig, null, 2));
 
 export default asgardeoConfig;
