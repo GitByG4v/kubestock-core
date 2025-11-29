@@ -5,6 +5,10 @@ metadata:
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
+  annotations:
+    notifications.argoproj.io/subscribe.on-deployed.slack: inventory-alerts
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: inventory-alerts
+    notifications.argoproj.io/subscribe.on-health-degraded.slack: inventory-alerts
 spec:
   project: staging
   
@@ -41,9 +45,3 @@ spec:
     kind: Deployment
     jsonPointers:
     - /spec/replicas
-  
-  # Notification annotations
-  annotations:
-    notifications.argoproj.io/subscribe.on-deployed.slack: inventory-alerts
-    notifications.argoproj.io/subscribe.on-sync-failed.slack: inventory-alerts
-    notifications.argoproj.io/subscribe.on-health-degraded.slack: inventory-alerts

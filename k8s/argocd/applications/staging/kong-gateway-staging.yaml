@@ -5,6 +5,9 @@ metadata:
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
+  annotations:
+    notifications.argoproj.io/subscribe.on-deployed.slack: inventory-alerts
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: inventory-alerts
 spec:
   project: staging
   
@@ -33,7 +36,3 @@ spec:
         maxDuration: 3m
   
   revisionHistoryLimit: 10
-  
-  annotations:
-    notifications.argoproj.io/subscribe.on-deployed.slack: inventory-alerts
-    notifications.argoproj.io/subscribe.on-sync-failed.slack: inventory-alerts
