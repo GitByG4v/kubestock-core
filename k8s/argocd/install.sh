@@ -48,8 +48,11 @@ check_prerequisites() {
 install_argocd() {
     log_info "Installing ArgoCD..."
     
+    # Get script directory
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    
     # Create namespace
-    kubectl apply -f k8s/argocd/namespace.yaml
+    kubectl apply -f "${SCRIPT_DIR}/namespace.yaml"
     
     # Install ArgoCD
     log_info "Downloading ArgoCD manifests..."
@@ -72,10 +75,13 @@ install_argocd() {
 configure_argocd() {
     log_info "Configuring ArgoCD..."
     
+    # Get script directory
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    
     # Apply custom configurations
-    kubectl apply -f k8s/argocd/argocd-cm.yaml
-    kubectl apply -f k8s/argocd/argocd-rbac-cm.yaml
-    kubectl apply -f k8s/argocd/argocd-notifications-cm.yaml
+    kubectl apply -f "${SCRIPT_DIR}/argocd-cm.yaml"
+    kubectl apply -f "${SCRIPT_DIR}/argocd-rbac-cm.yaml"
+    kubectl apply -f "${SCRIPT_DIR}/argocd-notifications-cm.yaml"
     
     # Restart ArgoCD server to apply changes
     kubectl rollout restart deployment/argocd-server -n argocd
@@ -88,15 +94,16 @@ configure_argocd() {
 # Setup Ingress
 ################################################################################
 setup_ingress() {
-    log_info "Setting up ArgoCD ingress..."
+    log_info "Setting up ArgoCD ingress (skipping - configure manually)..."
     
-    # Update domain in ingress
-    sed -i "s/argocd.yourdomain.com/${DOMAIN}/g" k8s/argocd/argocd-server-ingress.yaml
+    # Get script directory
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     
-    # Apply ingress
-    kubectl apply -f k8s/argocd/argocd-server-ingress.yaml
+    # Note: Ingress requires cert-manager and nginx-ingress-controller
+    # Uncomment below if you have ingress controller installed:
+    # kubectl apply -f "${SCRIPT_DIR}/argocd-server-ingress.yaml"
     
-    log_info "Ingress configured for: ${DOMAIN}"
+    log_info "Ingress skipped - use port-forward for access"
 }
 
 ################################################################################
@@ -105,8 +112,11 @@ setup_ingress() {
 create_projects() {
     log_info "Creating ArgoCD projects..."
     
-    kubectl apply -f k8s/argocd/projects/staging-project.yaml
-    kubectl apply -f k8s/argocd/projects/production-project.yaml
+    # Get script directory
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    
+    kubectl apply -f "${SCRIPT_DIR}/projects/staging-project.yaml"
+    kubectl apply -f "${SCRIPT_DIR}/projects/production-project.yaml"
     
     log_info "Projects created ✓"
 }
@@ -117,14 +127,17 @@ create_projects() {
 create_applications() {
     log_info "Creating ArgoCD applications..."
     
+    # Get script directory
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    
     # Staging applications
-    kubectl apply -f k8s/argocd/applications/staging/
+    kubectl apply -f "${SCRIPT_DIR}/applications/staging/"
     
     # Production applications (optional)
     read -p "Deploy production applications? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        kubectl apply -f k8s/argocd/applications/production/
+        kubectl apply -f "${SCRIPT_DIR}/applications/production/"
         log_info "Production applications created ✓"
     else
         log_warn "Skipping production applications"
