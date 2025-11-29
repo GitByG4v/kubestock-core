@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opensearch-index-templates
+  namespace: logging
+data:
+  application-logs-template.json: |
+    {
+      "index_patterns": ["application-logs-*"],
+      "template": {
+        "settings": {
+          "number_of_shards": 3,
+          "number_of_replicas": 1,
+          "index.lifecycle.name": "logs-retention-policy",
+          "index.lifecycle.rollover_alias": "application-logs",
+          "refresh_interval": "5s"
+        },
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "log": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "stream": {
+              "type": "keyword"
+            },
+            "k8s_pod_name": {
+              "type": "keyword"
+            },
+            "k8s_namespace_name": {
+              "type": "keyword"
+            },
+            "k8s_container_name": {
+              "type": "keyword"
+            },
+            "k8s_labels": {
+              "type": "object",
+              "enabled": true
+            },
+            "cluster_name": {
+              "type": "keyword"
+            },
+            "log_type": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  
+  system-logs-template.json: |
+    {
+      "index_patterns": ["system-logs-*"],
+      "template": {
+        "settings": {
+          "number_of_shards": 2,
+          "number_of_replicas": 1,
+          "index.lifecycle.name": "logs-retention-policy",
+          "index.lifecycle.rollover_alias": "system-logs",
+          "refresh_interval": "10s"
+        },
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "message": {
+              "type": "text"
+            },
+            "hostname": {
+              "type": "keyword"
+            },
+            "log_type": {
+              "type": "keyword"
+            },
+            "cluster_name": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  
+  retention-policy.json: |
+    {
+      "policy": {
+        "description": "30-day log retention policy",
+        "default_state": "hot",
+        "states": [
+          {
+            "name": "hot",
+            "actions": [
+              {
+                "rollover": {
+                  "min_index_age": "1d",
+                  "min_size": "5gb"
+                }
+              }
+            ],
+            "transitions": [
+              {
+                "state_name": "delete",
+                "conditions": {
+                  "min_index_age": "30d"
+                }
+              }
+            ]
+          },
+          {
+            "name": "delete",
+            "actions": [
+              {
+                "delete": {}
+              }
+            ]
+          }
+        ]
+      }
+    }
