@@ -52,3 +52,8 @@ temp/
 # Environment files
 .env
 **/.env
+
+# Documentation (except main README)
+*.md
+!README.md
+!docs/README.md
