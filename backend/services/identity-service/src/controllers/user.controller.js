@@ -148,7 +148,7 @@ const createSupplier = async (req, res) => {
     // Add user to supplier group
     const supplierGroupId = asgardeoClient.groupIds.supplier;
     if (supplierGroupId) {
-      await asgardeoClient.addUserToGroup(supplierGroupId, scimUser.id);
+      await asgardeoClient.addUserToGroup(supplierGroupId, scimUser.id, email);
       logger.info(`Added user ${scimUser.id} to supplier group`);
     } else {
       logger.warn("Supplier group ID not configured, user created without group assignment");
@@ -205,7 +205,7 @@ const createWarehouseStaff = async (req, res) => {
     // Add user to warehouse_staff group
     const staffGroupId = asgardeoClient.groupIds.warehouse_staff;
     if (staffGroupId) {
-      await asgardeoClient.addUserToGroup(staffGroupId, scimUser.id);
+      await asgardeoClient.addUserToGroup(staffGroupId, scimUser.id, email);
       logger.info(`Added user ${scimUser.id} to warehouse_staff group`);
     } else {
       logger.warn("Warehouse staff group ID not configured, user created without group assignment");
