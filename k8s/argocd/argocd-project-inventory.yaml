@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: inventory-project
+  namespace: argocd
+spec:
+  description: "Project for inventory microservices blue/green deployments"
+  sourceRepos:
+    - 'https://github.com/KubeStock-DevOps-project/*'
+  destinations:
+    - namespace: '*'
+      server: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
