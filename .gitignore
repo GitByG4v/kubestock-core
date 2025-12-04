@@ -1,5 +1,4 @@
 # Documentation and scripts
-docs/
 scripts/
 **/scripts/
 
@@ -53,7 +52,5 @@ temp/
 .env
 **/.env
 
-# Documentation (except main README)
-*.md
-!README.md
-!docs/README.md
+asgardeo-auth-react-sdk/
+ms-test/
