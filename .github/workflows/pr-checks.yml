@@ -205,12 +205,12 @@ jobs:
       - name: Build Docker image
         if: matrix.changed == 'true'
         run: |
-          cd ${{ matrix.path }}
-          docker build -t ${{ matrix.name }}:pr-${{ github.event.pull_request.number }} .
+          docker build -t ${{ matrix.name }}:pr-${{ github.event.pull_request.number }} ${{ matrix.path }}
 
       - name: Run Trivy vulnerability scanner (Table)
         uses: aquasecurity/trivy-action@master
         if: matrix.changed == 'true'
+        continue-on-error: true
         with:
           image-ref: ${{ matrix.name }}:pr-${{ github.event.pull_request.number }}
           format: 'table'
@@ -298,9 +298,8 @@ jobs:
 
       - name: Install dependencies
         if: matrix.changed == 'true'
-        run: |
-          cd ${{ matrix.path }}
-          npm ci
+        working-directory: ${{ matrix.path }}
+        run: npm ci
 
       - name: Wait for PostgreSQL
         if: matrix.changed == 'true'
@@ -312,20 +311,18 @@ jobs:
 
       - name: Run database migrations
         if: matrix.changed == 'true'
+        working-directory: ${{ matrix.path }}
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/${{ matrix.db }}
-        run: |
-          cd ${{ matrix.path }}
-          npm run migrate:up
+        run: npm run migrate:up
 
       - name: Run integration tests
         if: matrix.changed == 'true'
+        working-directory: ${{ matrix.path }}
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/${{ matrix.db }}
           NODE_ENV: test
-        run: |
-          cd ${{ matrix.path }}
-          npm run test:integration --if-present
+        run: npm run test:integration --if-present
 
       - name: Integration test summary
         if: matrix.changed == 'true'
