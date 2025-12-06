@@ -16,7 +16,8 @@ env:
   NODE_VERSION: '18'
   AWS_REGION: ap-south-1
   ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
-  GITOPS_REPO: ${{ secrets.GITOPS_REPO || 'Dilan-WSO2-Final-Project-Inventory-Stock-Management-Microservices-System' }}
+  # Defaults to canonical GitOps repo; override via repository/ORG/REPO secret if needed
+  GITOPS_REPO: KubeStock-DevOps-project/kubestock-gitops
   GITOPS_BRANCH: main
 
 permissions:
